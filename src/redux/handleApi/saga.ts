@@ -9,7 +9,7 @@ import {dispatch} from '@common';
 import {AppSate, onSetToken} from '@reducer/appReducer';
 import {ApiConstants, appUrl} from '@config/api';
 import {handleResponseAxios, handleErrorAxios, _onPushLogout} from '@common';
-const tokenKeyHeader = 'authorization';
+const tokenKeyHeader = 'Authorization';
 let refreshTokenRequest: Promise<string> | null = null;
 const AxiosInstance = Axios.create({});
 
@@ -57,8 +57,8 @@ function* Request<T = unknown>(
     baseURL: appUrl,
     timeout: TIME_OUT,
     headers: {
+      [tokenKeyHeader]: token || '',
       'Content-Type': 'application/json',
-      [tokenKeyHeader]: token,
     },
   };
   return yield AxiosInstance.request(
