@@ -1,12 +1,10 @@
-import {combineReducers, configureStore} from '@reduxjs/toolkit';
-import createSagaMiddleware from 'redux-saga';
-import {persistStore, persistReducer} from 'redux-persist';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import rootSaga from '../saga/rootSaga';
-import authReducer from '../reducer/authReducer';
-import languageReducer from '../reducer/languageReducer';
-import appReducer from '../reducer/appReducer';
+import {combineReducers, configureStore} from '@reduxjs/toolkit';
 import {createLogger} from 'redux-logger';
+import {persistReducer, persistStore} from 'redux-persist';
+import createSagaMiddleware from 'redux-saga';
+import appReducer from '../reducer/appReducer';
+import languageReducer from '../reducer/languageReducer';
 const sagaMiddleware = createSagaMiddleware();
 const middleware = [];
 middleware.push(createLogger());
@@ -17,7 +15,6 @@ const persistConfig = {
   blacklist: ['auth'],
 };
 const rootReducer = combineReducers({
-  auth: authReducer,
   language: languageReducer,
   appReducer: appReducer,
 });
@@ -28,6 +25,5 @@ const store = configureStore({
   middleware: [sagaMiddleware],
 });
 const persistor = persistStore(store);
-sagaMiddleware.run(rootSaga);
 export {persistor, store};
 export type RootState = ReturnType<typeof rootReducer>;
