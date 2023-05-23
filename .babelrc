@@ -1,20 +1,25 @@
 {
-    "plugins": [
-      ["module-resolver", {
+  "plugins": [
+    [
+      "module-resolver",
+      {
         "root": ["./"],
         "alias": {
           "@components": "./src/components",
-          "@screens":"./src/screens",
-          "@navigation":"./src/navigation",
-          "@reducer":"./src/redux/reducer",
-          "@saga":"./src/redux/saga",
-          "@store":"./src/redux/store",
-          "@common":"./src/common",
-          "@utils":"./src/utils",
-          "@assets":"./src/assets",
-          "@config":"./src/config",
-          "@src":"./src"
+          "@screens": "./src/screens",
+          "@themes": "./src/themes",
+          "@videos": "./src/videos",
+          "@navigation": "./src/navigation",
+          "@reducer": "./src/redux/reducer",
+          "@saga": "./src/redux/saga",
+          "@store": "./src/redux/store",
+          "@common": "./src/common",
+          "@utils": "./src/utils",
+          "@assets": "./src/assets",
+          "@config": "./src/config",
+          "@src": "./src"
         }
-      }]
+      }
     ]
-  }
+  ]
+}
