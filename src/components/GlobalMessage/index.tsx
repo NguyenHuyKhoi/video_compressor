@@ -7,8 +7,8 @@ import {
   Text,
   TouchableWithoutFeedback,
   View,
+  TouchableOpacity,
 } from 'react-native';
-import {TouchableOpacity} from 'react-native-gesture-handler';
 
 export const globalMessageRef = React.createRef<any>();
 export const globalMessage = {

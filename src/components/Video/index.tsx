@@ -8,17 +8,19 @@ import {
   Text,
   TouchableOpacity,
   View,
+  ViewStyle,
 } from 'react-native';
 
 interface Props {
   data: VideoEntity;
+  style?: ViewStyle;
 }
 const _margin = sizes._10sdp;
 const _size = (_screen_width - _margin * 3) / 3;
-export const Video: FC<Props> = ({data}) => {
+export const Video: FC<Props> = ({data, style}) => {
   const {size, thumbnail, duration} = data;
   return (
-    <TouchableOpacity style={styles.container}>
+    <TouchableOpacity style={[styles.container, style]}>
       <ImageBackground source={{uri: thumbnail}} style={styles.thumbnail} />
       <View style={styles.sizeView}>
         <Text style={styles.sizeLabel}>{formatBytes(size)}</Text>
