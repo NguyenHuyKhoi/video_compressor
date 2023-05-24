@@ -5,11 +5,16 @@ import {StyleSheet, Text, TouchableOpacity, ViewStyle} from 'react-native';
 
 interface Props {
   style?: ViewStyle;
+  title: string;
+  onPress?: () => void;
 }
-export const Task: FC<Props> = ({style}) => {
+export const Task: FC<Props> = ({style, title, onPress}) => {
   return (
-    <TouchableOpacity style={[styles.container, style]}>
-      <Text style={styles.label}>title</Text>
+    <TouchableOpacity
+      disabled={onPress === undefined}
+      onPress={onPress}
+      style={[styles.container, style]}>
+      <Text style={styles.label}>{title}</Text>
     </TouchableOpacity>
   );
 };

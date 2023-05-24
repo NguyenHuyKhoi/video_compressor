@@ -1,19 +1,31 @@
-import {BackButton, Header} from '@components';
-import {VideoGroupEntity} from '@src/model';
+import {BackButton, Header, Video} from '@components';
+import {VideoEntity, VideoGroupEntity} from '@src/model';
 import {colors} from '@themes';
 import {sizes} from '@utils';
-import React, {FC} from 'react';
+import React, {FC, useCallback} from 'react';
 import {FlatList, StyleSheet, View} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import videoGroups from '../../redux/data.json';
-import {Video} from './components';
+import {useNavigation} from '@react-navigation/native';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {APP_SCREEN, RootStackParamList} from '@navigation/ScreenTypes';
 interface HomeProps {}
 
 export const VideoList: FC<HomeProps> = ({}) => {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const selectVideo = useCallback(
+    (data: VideoEntity) => {
+      navigation.navigate(APP_SCREEN.VIDEO_TASKS, {
+        data,
+      });
+    },
+    [navigation],
+  );
   return (
     <View style={styles.container}>
       <Header
-        title="Video compressor"
+        title="Video List"
         headerLeft={<BackButton />}
         headerRight={
           <View style={styles.headerRight}>
@@ -25,7 +37,9 @@ export const VideoList: FC<HomeProps> = ({}) => {
         data={videoGroups[0].items}
         numColumns={3}
         keyExtractor={(item: VideoGroupEntity, index: number) => index + ''}
-        renderItem={({item}) => <Video data={item} />}
+        renderItem={({item}) => (
+          <Video data={item} onPress={() => selectVideo(item)} />
+        )}
       />
     </View>
   );

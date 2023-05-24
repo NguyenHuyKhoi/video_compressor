@@ -6,8 +6,9 @@ import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 
 interface Props {
   data: ConfigEntity;
+  onPress: () => void;
 }
-export const Config: FC<Props> = ({}) => {
+export const Config: FC<Props> = ({onPress}) => {
   const {size, percentage, width, height} = {
     size: 10000,
     percentage: 30,
@@ -15,7 +16,7 @@ export const Config: FC<Props> = ({}) => {
     height: 1080,
   };
   return (
-    <TouchableOpacity style={styles.container}>
+    <TouchableOpacity style={styles.container} onPress={onPress}>
       <Text style={styles.quality}>{`${percentage}%`}</Text>
       <Text style={styles.dimension}>{`${width}x${height}`}</Text>
       <View style={styles.sizeView}>

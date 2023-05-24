@@ -1,18 +1,32 @@
 import {BackButton, Header, Tabs, VideoInfor} from '@components';
-import {ConfigEntity, VideoCompressConfig} from '@src/model';
-import {colors} from '@themes';
+import {APP_SCREEN, RootStackParamList} from '@navigation/ScreenTypes';
+import {useNavigation} from '@react-navigation/native';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {ConfigEntity} from '@src/model';
 import {sizes} from '@utils';
-import React, {FC, useState} from 'react';
-import {FlatList, StyleSheet, Text, View} from 'react-native';
+import React, {FC, useCallback, useState} from 'react';
+import {FlatList, StyleSheet, View} from 'react-native';
 import {Config, CustomConfig} from './components';
 interface Props {}
 
 export const VideoCompressSetting: FC<Props> = ({}) => {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [selectedTab, setSelectedTab] = useState<number>(0);
   const tabs = ['High quality', 'Low quality', 'Custom'];
+
+  const selectConfig = useCallback(
+    (config: ConfigEntity) => {
+      navigation.navigate(APP_SCREEN.VIDEO_COMPRESS_PROCESS, {
+        config,
+        data: {},
+      });
+    },
+    [navigation],
+  );
   return (
     <View style={styles.container}>
-      <Header title="Video Setting" headerLeft={<BackButton />} />
+      <Header title="Compress Setting" headerLeft={<BackButton />} />
       <Tabs
         selectedTab={selectedTab}
         tabs={tabs}
@@ -28,10 +42,12 @@ export const VideoCompressSetting: FC<Props> = ({}) => {
             data={[1, 2, 3, 4]}
             style={styles.configs}
             keyExtractor={(item: ConfigEntity, index: number) => index + ''}
-            renderItem={({item}) => <Config data={item} />}
+            renderItem={({item}) => (
+              <Config data={item} onPress={() => selectConfig(item)} />
+            )}
           />
         ) : (
-          <CustomConfig />
+          <CustomConfig onDone={selectConfig} />
         )}
       </View>
     </View>

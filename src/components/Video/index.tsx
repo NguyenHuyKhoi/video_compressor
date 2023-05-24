@@ -14,13 +14,17 @@ import {
 interface Props {
   data: VideoEntity;
   style?: ViewStyle;
+  onPress?: () => void;
 }
 const _margin = sizes._10sdp;
 const _size = (_screen_width - _margin * 3) / 3;
-export const Video: FC<Props> = ({data, style}) => {
+export const Video: FC<Props> = ({data, style, onPress}) => {
   const {size, thumbnail, duration} = data;
   return (
-    <TouchableOpacity style={[styles.container, style]}>
+    <TouchableOpacity
+      disabled={onPress === undefined}
+      onPress={onPress}
+      style={[styles.container, style]}>
       <ImageBackground source={{uri: thumbnail}} style={styles.thumbnail} />
       <View style={styles.sizeView}>
         <Text style={styles.sizeLabel}>{formatBytes(size)}</Text>

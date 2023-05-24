@@ -6,11 +6,12 @@ import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 
 interface Props {
   data: VideoGroupEntity;
+  onPress: () => void;
 }
-export const VideoGroup: FC<Props> = ({data}) => {
+export const VideoGroup: FC<Props> = ({data, onPress}) => {
   const {name, size, items} = data;
   return (
-    <TouchableOpacity style={styles.container}>
+    <TouchableOpacity style={styles.container} onPress={onPress}>
       <Image source={{uri: items[0].thumbnail}} style={styles.thumbnail} />
       <Text style={styles.name}>{name}</Text>
       <View style={styles.sizeView}>
