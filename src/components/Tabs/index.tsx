@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
   },
   itemLabel: {
-    fontSize: sizes._18sdp,
+    fontSize: sizes._16sdp,
     fontWeight: '600',
     color: colors.white,
   },

@@ -8,7 +8,8 @@
           "@components": "./src/components",
           "@screens": "./src/screens",
           "@themes": "./src/themes",
-          "@videos": "./src/videos",
+          "@model": "./src/model",
+          "@native": "./src/native",
           "@navigation": "./src/navigation",
           "@reducer": "./src/redux/reducer",
           "@saga": "./src/redux/saga",
@@ -16,8 +17,7 @@
           "@common": "./src/common",
           "@utils": "./src/utils",
           "@assets": "./src/assets",
-          "@config": "./src/config",
-          "@src": "./src"
+          "@config": "./src/config"
         }
       }
     ]

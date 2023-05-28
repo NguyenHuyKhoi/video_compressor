@@ -1,4 +1,4 @@
-import {VideoEntity} from '@src/model';
+import {VideoEntity} from '@model';
 import {colors} from '@themes';
 import {_screen_width, formatBytes, formatDuration, sizes} from '@utils';
 import React, {FC} from 'react';
@@ -19,18 +19,26 @@ interface Props {
 const _margin = sizes._10sdp;
 const _size = (_screen_width - _margin * 3) / 3;
 export const Video: FC<Props> = ({data, style, onPress}) => {
-  const {size, thumbnail, duration} = data;
+  const {size, base64Thumb, duration, width, height} = data;
   return (
     <TouchableOpacity
       disabled={onPress === undefined}
       onPress={onPress}
       style={[styles.container, style]}>
-      <ImageBackground source={{uri: thumbnail}} style={styles.thumbnail} />
+      <View style={styles.resolutionView}>
+        <Text style={styles.resolutionLabel}>{`${width}x${height}`}</Text>
+      </View>
+      <ImageBackground
+        source={{uri: `data:image/jpeg;base64,${base64Thumb}`}}
+        style={styles.thumbnail}
+      />
       <View style={styles.sizeView}>
         <Text style={styles.sizeLabel}>{formatBytes(size)}</Text>
       </View>
       <View style={styles.durationView}>
-        <Text style={styles.durationLabel}>{formatDuration(duration)}</Text>
+        <Text style={styles.durationLabel}>
+          {formatDuration(Math.floor(duration / 1000))}
+        </Text>
       </View>
     </TouchableOpacity>
   );
@@ -60,6 +68,21 @@ const styles = StyleSheet.create({
     borderRadius: sizes._4sdp,
   },
   sizeLabel: {
+    fontWeight: '700',
+    color: colors.white,
+    fontSize: sizes._12sdp,
+  },
+  resolutionView: {
+    padding: sizes._3sdp,
+    backgroundColor: colors.black + '99',
+    borderRadius: sizes._4sdp,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+    position: 'absolute',
+    top: 0,
+  },
+  resolutionLabel: {
     fontWeight: '700',
     color: colors.white,
     fontSize: sizes._12sdp,

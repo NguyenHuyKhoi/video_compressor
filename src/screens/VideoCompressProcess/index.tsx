@@ -1,37 +1,158 @@
 import {BackButton, Header} from '@components';
-import {APP_SCREEN, RootStackParamList} from '@navigation/ScreenTypes';
-import {useNavigation} from '@react-navigation/native';
+import {APP_SCREEN, RootStackParamList} from '@navigation';
+import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {colors} from '@themes';
-import {sizes} from '@utils';
-import React, {FC, useEffect} from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import {formatBytes, formatFFmpegBytes, sizes} from '@utils';
+import React, {FC, useCallback, useEffect, useState} from 'react';
+import {StyleSheet, Text, View, Button} from 'react-native';
 import {ProgressBar} from 'react-native-ui-lib';
+import {FFmpegKit, ReturnCode} from 'ffmpeg-kit-react-native';
+import RNFS from 'react-native-fs';
+import {requestPermission} from '@native/permission';
+import {PERMISSIONS} from 'react-native-permissions';
+
+enum STATUS {
+  PROCESSING,
+  FAILURE,
+  SUCCESS,
+}
 interface Props {}
 
 export const VideoCompressProcess: FC<Props> = ({}) => {
+  const route =
+    useRoute<
+      RouteProp<RootStackParamList, APP_SCREEN.VIDEO_COMPRESS_PROCESS>
+    >();
+
+  const {data, config} = route.params;
+  // {
+  //   config: {
+  //     width: 1216,
+  //     height: 684,
+  //     bitrate: 15427974,
+  //     percentage: 95,
+  //     size: 11064839,
+  //   },
+  //   data: {
+  //     width: 1280,
+  //     title: 'VID_20230511_141215',
+  //     size: 11647199,
+  //     resolution: '1280×720',
+  //     relativePath: 'DCIM/Camera/',
+  //     uri: 'content://media/external/video/media/1000006141',
+  //     height: 720,
+  //     duration: 6040,
+  //     displayName: 'VID_20230511_141215.mp4',
+  //     id: 1000006141,
+  //     data: '/storage/emulated/0/DCIM/Camera/VID_20230511_141215.mp4',
+  //     orientation: '90',
+  //     bitrate: 15427974,
+  //   },
+  // };
+
+  //
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  useEffect(() => {}, [navigation]);
+
+  const [progressSize, setProgressSize] = useState<number>(0);
+  const [status, setStatus] = useState<STATUS>(STATUS.PROCESSING);
+  const [outputUri, setOutputUri] = useState<string>(undefined);
+  console.log('Config:', data.size, config.size);
+
+  const compressVideo = useCallback(() => {
+    let outputUri = '/storage/emulated/0/Movies/sample2.mp4';
+    setOutputUri(outputUri);
+    //RNFS.DocumentDirectoryPath + '/test.mp4';
+    //'/storage/emulated/0/Movies/sample.mp4';
+    //`${RNFS.CachesDirectoryPath}/video.zscaled.mp4`;
+    const command = `-i ${data.data} -vf scale=${config.width}:${
+      config.height
+    } -b:v ${formatFFmpegBytes(config.bitrate)} -y ${outputUri}`;
+    console.log('Command: ', command);
+
+    FFmpegKit.executeAsync(
+      command,
+      async session => {
+        const returnCode = await session.getReturnCode();
+        const duration = await session.getDuration();
+        const failStackTrace = await session.getFailStackTrace();
+        console.log('COMPRESS_VIDEO: duration : ', duration);
+        if (failStackTrace) {
+          console.log('COMPRESS_VIDEO: failStackTrace : ', failStackTrace);
+        }
+
+        if (ReturnCode.isSuccess(returnCode)) {
+          // SUCCESS
+          console.log('COMPRESS_VIDEO: SUCCESS');
+          setStatus(STATUS.SUCCESS);
+        } else if (ReturnCode.isCancel(returnCode)) {
+          console.log('COMPRESS_VIDEO: CANCEL');
+          setStatus(STATUS.FAILURE);
+          // CANCEL
+        } else {
+          console.log('COMPRESS_VIDEO: ERROR');
+          // ERROR
+        }
+      },
+      log => {
+        // CALLED WHEN SESSION PRINTS LOGS
+        console.log(log.getMessage());
+      },
+      statistics => {
+        const size = statistics.getSize();
+        console.log('COMPRESS_VIDEO: SIZE: ', size);
+        if (size > 0) {
+          setProgressSize(size);
+        }
+        // CALLED WHEN SESSION GENERATES STATISTICS
+      },
+    );
+  }, [config, data]);
   useEffect(() => {
-    setTimeout(() => {
+    compressVideo();
+  }, [compressVideo]);
+
+  useEffect(() => {
+    const request = async () => {
+      await requestPermission(PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE);
+      await requestPermission(PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE);
+    };
+    request();
+  }, []);
+
+  const percent = config.size
+    ? Math.floor((progressSize / config.size) * 100)
+    : 0;
+
+  useEffect(() => {
+    if (status === STATUS.SUCCESS && outputUri) {
       navigation.replace(APP_SCREEN.VIDEO_PLAY, {
-        data: {},
+        uri: outputUri,
       });
-    }, 3000);
-  }, [navigation]);
+    }
+  }, [navigation, outputUri, status]);
 
   return (
     <View style={styles.container}>
-      <Header title="Compressing" headerLeft={<BackButton />} />
+      <Header title="Đang nén" headerLeft={<BackButton />} />
       <View style={styles.body}>
         <View style={styles.resultView}>
-          <Text style={styles.resultUri}>éwg;wegwegwegweg</Text>
+          <Text
+            style={styles.resultUri}>{`Đường dẫn đã lưu: ${data.uri}`}</Text>
         </View>
-        <Text style={styles.processLabel}>Process...</Text>
-        <ProgressBar progress={55} fullWidth progressColor={colors.primary} />
+        <Text style={styles.processLabel}>Nén...</Text>
+        <ProgressBar
+          progress={percent}
+          fullWidth
+          progressColor={colors.primary}
+        />
         <View style={styles.processView}>
-          <Text style={styles.processSize}>4.5/123</Text>
-          <Text style={styles.processPercent}>100%</Text>
+          <Text style={styles.processSize}>{`${formatBytes(
+            progressSize,
+          )}/${formatBytes(config.size || 0)}`}</Text>
+          <Text style={styles.processPercent}>{`${percent}%`}</Text>
         </View>
       </View>
     </View>

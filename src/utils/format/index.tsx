@@ -1,26 +1,27 @@
-export const formatBytes = (bytes: number, decimals: number = 2) => {
+export const formatBytes = (bytes: number, decimals: number = 1) => {
   if (!+bytes) {
-    return '0 Bytes';
+    return '0 B';
   }
 
   const k = 1024;
   const dm = decimals < 0 ? 0 : decimals;
-  const sizes = [
-    'Bytes',
-    'KiB',
-    'MiB',
-    'GiB',
-    'TiB',
-    'PiB',
-    'EiB',
-    'ZiB',
-    'YiB',
-  ];
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
 
   const i = Math.floor(Math.log(bytes) / Math.log(k));
 
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
 };
+
+export const formatFFmpegBytes = (bytes: number, decimals: number = 1) => {
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ['B', 'K', 'M'];
+
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))}${sizes[i]}`;
+};
+
 export const formatDuration = (duration: number) => {
   var hours: any = Math.floor(duration / 3600);
   var minutes: any = Math.floor((duration - hours * 3600) / 60);

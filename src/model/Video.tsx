@@ -1,6 +1,21 @@
 export interface VideoEntity {
-  uri: string;
-  size: number;
+  id: number;
+  title: string;
+  displayName: string;
+  data: string;
   duration: number;
-  thumbnail: string;
+  size: number;
+  relativePath: string;
+  bitrate: number;
+  width: number;
+  height: number;
+  resolution: string;
+  uri: string;
+  base64Thumb: string;
+  orientation: ORIENTATION;
+}
+
+export enum ORIENTATION {
+  PORTRAIT = '0',
+  LANDSCAPE = '90',
 }

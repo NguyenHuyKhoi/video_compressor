@@ -1,4 +1,4 @@
-import {VideoEntity} from '@src/model';
+import {VideoEntity} from '@model';
 import {colors} from '@themes';
 import {sizes} from '@utils';
 import React, {FC} from 'react';
@@ -7,10 +7,10 @@ import {StyleSheet, Text, View} from 'react-native';
 interface Props {
   data: VideoEntity;
 }
-export const VideoInfor: FC<Props> = () => {
+export const VideoInfor: FC<Props> = ({data}) => {
   return (
     <View style={styles.container}>
-      <Text style={styles.uri}>{'uri'}</Text>
+      <Text style={styles.uri}>{data.data}</Text>
     </View>
   );
 };

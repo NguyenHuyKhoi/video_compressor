@@ -1,8 +1,8 @@
-import {VideoGroupEntity} from '@src/model';
+import {VideoGroupEntity} from '@model';
 import {colors} from '@themes';
 import {formatBytes, sizes} from '@utils';
 import React, {FC} from 'react';
-import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 
 interface Props {
   data: VideoGroupEntity;
@@ -12,10 +12,9 @@ export const VideoGroup: FC<Props> = ({data, onPress}) => {
   const {name, size, items} = data;
   return (
     <TouchableOpacity style={styles.container} onPress={onPress}>
-      <Image source={{uri: items[0].thumbnail}} style={styles.thumbnail} />
-      <Text style={styles.name}>{name}</Text>
+      <Text style={styles.name}>{`${name} (${items?.length || 0})`}</Text>
       <View style={styles.sizeView}>
-        <Text style={styles.sizeLabel}>{formatBytes(size)}</Text>
+        <Text style={styles.sizeLabel}>{formatBytes(size || 0)}</Text>
       </View>
     </TouchableOpacity>
   );

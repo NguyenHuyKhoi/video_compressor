@@ -1,4 +1,4 @@
-import {ConfigEntity} from '@src/model';
+import {ConfigEntity} from '@model';
 import {colors} from '@themes';
 import {formatBytes, sizes} from '@utils';
 import React, {FC} from 'react';
@@ -8,19 +8,26 @@ interface Props {
   data: ConfigEntity;
   onPress: () => void;
 }
-export const Config: FC<Props> = ({onPress}) => {
-  const {size, percentage, width, height} = {
-    size: 10000,
-    percentage: 30,
-    width: 1920,
-    height: 1080,
-  };
+export const Config: FC<Props> = ({data, onPress}) => {
+  const {size, percentage, width, height, standard} = data;
   return (
     <TouchableOpacity style={styles.container} onPress={onPress}>
       <Text style={styles.quality}>{`${percentage}%`}</Text>
-      <Text style={styles.dimension}>{`${width}x${height}`}</Text>
+      <View style={styles.center}>
+        <View style={{flex: 1}} />
+        <Text style={styles.dimension}>{`${width}x${height}`}</Text>
+
+        <View style={{flex: 1}}>
+          {standard && (
+            <View style={styles.standardView}>
+              <Text style={styles.standardLabel}>{standard}</Text>
+            </View>
+          )}
+        </View>
+      </View>
+
       <View style={styles.sizeView}>
-        <Text style={styles.sizeLabel}>{formatBytes(size)}</Text>
+        <Text style={styles.sizeLabel}>{formatBytes(Math.floor(size))}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -36,6 +43,24 @@ const styles = StyleSheet.create({
     padding: sizes._10sdp,
     marginBottom: sizes._10sdp,
   },
+  center: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  standardView: {
+    paddingVertical: sizes._3sdp,
+    borderRadius: sizes._10sdp,
+    backgroundColor: colors.secondary + 'AA',
+    width: sizes._50sdp,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  standardLabel: {
+    color: colors.white,
+    fontSize: sizes._12sdp,
+    fontWeight: '700',
+  },
   quality: {
     color: colors.black,
     fontWeight: '500',
@@ -45,12 +70,15 @@ const styles = StyleSheet.create({
     color: colors.black,
     fontWeight: '500',
     fontSize: sizes._16sdp,
+    flex: 1,
   },
   sizeView: {
     paddingVertical: sizes._4sdp,
-    paddingHorizontal: sizes._6sdp,
+    width: sizes._65sdp,
+    justifyContent: 'center',
+    alignItems: 'center',
     backgroundColor: colors.secondary,
-    borderRadius: sizes._10sdp,
+    borderRadius: sizes._6sdp,
   },
   sizeLabel: {
     fontWeight: '700',

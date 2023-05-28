@@ -1,53 +1,40 @@
 import {BackButton, Header, Video, VideoInfor} from '@components';
-import {colors} from '@themes';
+import {APP_SCREEN, RootStackParamList} from '@navigation/ScreenTypes';
+import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {sizes} from '@utils';
 import React, {FC, useCallback} from 'react';
 import {StyleSheet, View} from 'react-native';
 import {Task} from './components';
-import {APP_SCREEN, RootStackParamList} from '@navigation/ScreenTypes';
-import {useNavigation} from '@react-navigation/native';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {VideoEntity} from '@src/model';
 
-interface TaskProps {
-  label: string;
-  navigate_to: APP_SCREEN;
-}
-const Tasks: TaskProps[] = [
-  {
-    label: 'Compress',
-    navigate_to: APP_SCREEN.VIDEO_COMPRESS_SETTING,
-  },
-];
 interface Props {}
 
 export const VideoTasks: FC<Props> = ({}) => {
+  const route =
+    useRoute<RouteProp<RootStackParamList, APP_SCREEN.VIDEO_TASKS>>();
+
+  const {data} = route.params;
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const selectTask = useCallback(
-    (data: VideoEntity) => {
-      navigation.navigate(APP_SCREEN.VIDEO_COMPRESS_SETTING, {
-        data,
-      });
-    },
-    [navigation],
-  );
+  const compressVideo = useCallback(() => {
+    navigation.navigate(APP_SCREEN.VIDEO_COMPRESS_SETTING, {
+      data,
+    });
+  }, [data, navigation]);
   return (
     <View style={styles.container}>
-      <Header title="Video Tasks" headerLeft={<BackButton />} />
+      <Header title="Chọn tác vụ" headerLeft={<BackButton />} />
       <View style={styles.body}>
-        <VideoInfor data={undefined} />
+        <VideoInfor data={data} />
         <View style={styles.content}>
           <View style={styles.tasks}>
-            {Tasks.map((item: TaskProps) => (
-              <Task
-                style={styles.task}
-                title={item.label}
-                onPress={() => selectTask(item)}
-              />
-            ))}
+            <Task
+              style={styles.task}
+              title={'Nén video'}
+              onPress={compressVideo}
+            />
           </View>
-          <Video data={{}} />
+          <Video data={data} />
         </View>
       </View>
     </View>

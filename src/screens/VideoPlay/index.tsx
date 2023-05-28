@@ -1,4 +1,7 @@
 import {BackButton, Header} from '@components';
+import {APP_SCREEN, RootStackParamList} from '@navigation';
+import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {colors} from '@themes';
 import {_screen_width, sizes} from '@utils';
 import React, {FC} from 'react';
@@ -8,13 +11,19 @@ import Video from 'react-native-video';
 interface Props {}
 
 export const VideoPlay: FC<Props> = ({}) => {
+  const route =
+    useRoute<RouteProp<RootStackParamList, APP_SCREEN.VIDEO_PLAY>>();
+  const uri = route.params.uri;
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   return (
     <View style={styles.container}>
-      <Header title="Video Play" headerLeft={<BackButton />} />
+      <Header title="Phát video" headerLeft={<BackButton />} />
       <View style={styles.body} />
       <Video
-        source={{uri: 'background'}} // Can be a URL or a local file.
+        source={{uri}} // Can be a URL or a local file.
         style={styles.video}
+        resizeMode="contain"
       />
       <View style={styles.actions}>
         <TouchableOpacity style={styles.btn}>
