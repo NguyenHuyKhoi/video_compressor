@@ -2,7 +2,10 @@ package com.rn_boilerplate_ts;
 
 import android.graphics.Bitmap;
 import android.util.Base64;
+import android.util.Size;
 
+import com.facebook.react.bridge.Promise;
+import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeMap;
 import com.google.gson.Gson;
@@ -58,4 +61,5 @@ public class Util {
         String encoded = Base64.encodeToString(byteArray, Base64.DEFAULT);
         return encoded;
     }
+
 }

@@ -13,6 +13,7 @@ export interface VideoEntity {
   uri: string;
   base64Thumb: string;
   orientation: ORIENTATION;
+  createdAt: string;
 }
 
 export enum ORIENTATION {

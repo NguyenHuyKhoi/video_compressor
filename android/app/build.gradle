@@ -28,7 +28,7 @@ import com.android.build.OutputFile
  *   bundleInDebug: false,
  *
  *   // whether to bundle JS and assets in release mode
- *   bundleInRelease: true,
+ *
  *
  *   // whether to bundle JS and assets in another build variant (if configured).
  *   // See http://tools.android.com/tech-docs/new-build-system/user-guide#TOC-Build-Variants
@@ -190,6 +190,7 @@ dependencies {
     implementation "com.facebook.react:react-native:+"  // From node_modules
     implementation 'com.google.code.gson:gson:2.8.7'
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
+    implementation 'androidx.documentfile:documentfile:1.0.1'
 
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}") {
       exclude group:'com.facebook.fbjni'

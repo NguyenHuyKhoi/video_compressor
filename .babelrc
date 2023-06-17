@@ -13,6 +13,7 @@
           "@navigation": "./src/navigation",
           "@reducer": "./src/redux/reducer",
           "@saga": "./src/redux/saga",
+          "@middleware": "./src/redux/middleware",
           "@store": "./src/redux/store",
           "@common": "./src/common",
           "@utils": "./src/utils",

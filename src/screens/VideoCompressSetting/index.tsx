@@ -110,7 +110,6 @@ export const VideoCompressSetting: FC<Props> = ({}) => {
         tabs={tabs}
         onSelectTab={number => {
           setSelectedTab(number);
-          console.log('select : ', number);
         }}
       />
       <View style={styles.body}>

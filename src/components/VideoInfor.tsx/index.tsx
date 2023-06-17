@@ -10,7 +10,9 @@ interface Props {
 export const VideoInfor: FC<Props> = ({data}) => {
   return (
     <View style={styles.container}>
-      <Text style={styles.uri}>{data.data}</Text>
+      <Text style={styles.uri}>
+        {data.data.replace('/storage/emulated/0', '')}
+      </Text>
     </View>
   );
 };

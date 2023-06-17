@@ -1,17 +1,17 @@
 import {BackButton, Header} from '@components';
+import {requestPermission} from '@native/permission';
 import {APP_SCREEN, RootStackParamList} from '@navigation';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {colors} from '@themes';
 import {formatBytes, formatFFmpegBytes, sizes} from '@utils';
-import React, {FC, useCallback, useEffect, useState} from 'react';
-import {StyleSheet, Text, View, Button} from 'react-native';
-import {ProgressBar} from 'react-native-ui-lib';
 import {FFmpegKit, ReturnCode} from 'ffmpeg-kit-react-native';
-import RNFS from 'react-native-fs';
-import {requestPermission} from '@native/permission';
+import React, {FC, useCallback, useEffect, useState} from 'react';
+import {StyleSheet, Text, View} from 'react-native';
 import {PERMISSIONS} from 'react-native-permissions';
-
+import RNFS from 'react-native-fs';
+import * as ScopedStorage from 'react-native-scoped-storage';
 enum STATUS {
   PROCESSING,
   FAILURE,
@@ -58,18 +58,20 @@ export const VideoCompressProcess: FC<Props> = ({}) => {
 
   const [progressSize, setProgressSize] = useState<number>(0);
   const [status, setStatus] = useState<STATUS>(STATUS.PROCESSING);
-  const [outputUri, setOutputUri] = useState<string>(undefined);
-  console.log('Config:', data.size, config.size);
+  const [outputUri, setOutputUri] = useState<string>();
 
-  const compressVideo = useCallback(() => {
-    let outputUri = '/storage/emulated/0/Movies/sample2.mp4';
-    setOutputUri(outputUri);
+  const compressVideo = useCallback(async () => {
+    const outputPath = 'file://' + RNFS.TemporaryDirectoryPath + '/output.mp4';
+    const resultPath = await AsyncStorage.getItem('result_uri');
+    if (!resultPath) {
+      return;
+    }
     //RNFS.DocumentDirectoryPath + '/test.mp4';
     //'/storage/emulated/0/Movies/sample.mp4';
     //`${RNFS.CachesDirectoryPath}/video.zscaled.mp4`;
     const command = `-i ${data.data} -vf scale=${config.width}:${
       config.height
-    } -b:v ${formatFFmpegBytes(config.bitrate)} -y ${outputUri}`;
+    } -b:v ${formatFFmpegBytes(config.bitrate)} -y ${outputPath}`;
     console.log('Command: ', command);
 
     FFmpegKit.executeAsync(
@@ -85,7 +87,15 @@ export const VideoCompressProcess: FC<Props> = ({}) => {
 
         if (ReturnCode.isSuccess(returnCode)) {
           // SUCCESS
-          console.log('COMPRESS_VIDEO: SUCCESS');
+          try {
+            console.log('Copy file from ', outputPath, ' to  ', resultPath);
+            await ScopedStorage.copyFile(outputPath, resultPath, () => {});
+            console.log('Delete temp file', await RNFS.stat(outputPath));
+            await RNFS.unlink(outputPath);
+            setOutputUri(resultPath);
+          } catch (error) {
+            console.log('Error', error);
+          }
           setStatus(STATUS.SUCCESS);
         } else if (ReturnCode.isCancel(returnCode)) {
           console.log('COMPRESS_VIDEO: CANCEL');
@@ -143,11 +153,11 @@ export const VideoCompressProcess: FC<Props> = ({}) => {
             style={styles.resultUri}>{`Đường dẫn đã lưu: ${data.uri}`}</Text>
         </View>
         <Text style={styles.processLabel}>Nén...</Text>
-        <ProgressBar
+        {/* <ProgressBar
           progress={percent}
           fullWidth
           progressColor={colors.primary}
-        />
+        /> */}
         <View style={styles.processView}>
           <Text style={styles.processSize}>{`${formatBytes(
             progressSize,

@@ -22,7 +22,8 @@ public class NativePackages implements ReactPackage {
         List<NativeModule> modules = new ArrayList<>();
 
         modules.add(new VideoModule(reactContext));
-
+        modules.add(new PermissionModule(reactContext));
+        modules.add(new StorageModule(reactContext));
         return modules;
     }
 

@@ -4,6 +4,7 @@ import {createLogger} from 'redux-logger';
 import {persistReducer, persistStore} from 'redux-persist';
 import createSagaMiddleware from 'redux-saga';
 import appReducer from '../reducer/appReducer';
+import storageReducer from '../reducer/storageReducer';
 import languageReducer from '../reducer/languageReducer';
 const sagaMiddleware = createSagaMiddleware();
 const middleware = [];
@@ -11,12 +12,13 @@ middleware.push(createLogger());
 const persistConfig = {
   key: 'root',
   storage: AsyncStorage,
-  whitelist: ['language'],
-  blacklist: ['auth'],
+  whitelist: ['language', 'storage', 'app'],
+  blacklist: [],
 };
 const rootReducer = combineReducers({
   language: languageReducer,
-  appReducer: appReducer,
+  app: appReducer,
+  storage: storageReducer,
 });
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 const store = configureStore({

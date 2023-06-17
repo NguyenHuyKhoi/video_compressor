@@ -11,6 +11,7 @@
       "@model": ["./src/model"],
       "@saga/*": ["./src/redux/saga/*"],
       "@store": ["./src/redux/store"],
+      "@middleware": ["./src/redux/middleware"],
       "@common": ["./src/common"],
       "@utils": ["./src/utils"],
       "@assets": ["./src/assets"],

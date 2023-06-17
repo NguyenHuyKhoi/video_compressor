@@ -1,14 +1,15 @@
 import {VideoEntity, VideoGroupEntity} from '@model';
 
 export const groupVideo = (videos: VideoEntity[]) => {
+  console.log('VIDEOS: ', videos);
   const groups: VideoGroupEntity[] = [
-    {
-      name: 'Video bị nén',
-      directory: 'Movies/IdeaVideoCompressor/',
-    },
     {
       name: 'Download',
       directory: 'Download/',
+    },
+    {
+      name: 'DCIM',
+      directory: 'DCIM/',
     },
     {
       name: 'ScreenRecorder',
@@ -17,6 +18,10 @@ export const groupVideo = (videos: VideoEntity[]) => {
     {
       name: 'Camera',
       directory: 'DCIM/Camera/',
+    },
+    {
+      name: 'Movies',
+      directory: 'Movies/',
     },
   ];
 

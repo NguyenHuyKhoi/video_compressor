@@ -1,19 +1,32 @@
+import {useSelector} from '@common';
 import {BackButton, Header} from '@components';
 import {colors} from '@themes';
 import {sizes} from '@utils';
 import React, {FC} from 'react';
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {Button, StyleSheet, View} from 'react-native';
+import {FileType, openDocumentTree} from 'react-native-scoped-storage';
+import {GrantedFolder} from './component';
 interface Props {}
 
 export const Setting: FC<Props> = ({}) => {
+  const {folders, selectedFolder} = useSelector(x => x.storage);
+
+  const requestStorage = async () => {
+    const uri = await openDocumentTree(true);
+    console.log('URI: ', uri);
+  };
+
   return (
     <View style={styles.container}>
       <Header title="Setting" headerLeft={<BackButton />} />
       <View style={styles.body}>
-        <TouchableOpacity style={styles.config}>
-          <Text style={styles.label}>Duong dan da luu</Text>
-          <Text style={styles.value}>uri</Text>
-        </TouchableOpacity>
+        <Button title="Choose " onPress={requestStorage} />
+        {folders.map((folder: FileType) => (
+          <GrantedFolder
+            data={folder}
+            selected={selectedFolder?.uri === folder.uri}
+          />
+        ))}
       </View>
     </View>
   );
