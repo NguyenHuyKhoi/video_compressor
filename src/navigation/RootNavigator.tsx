@@ -1,15 +1,15 @@
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import React from 'react';
-import {APP_SCREEN, RootStackParamList} from './ScreenTypes';
 import {
   Home,
   Setting,
-  VideoCompressProcess,
-  VideoCompressSetting,
+  VideoCompress,
+  VideoDetail,
   VideoList,
   VideoPlay,
   VideoTasks,
 } from '@screens';
+import React from 'react';
+import {APP_SCREEN, RootStackParamList} from './ScreenTypes';
 const RootStack = createNativeStackNavigator<RootStackParamList>();
 
 export const RootNavigation = () => {
@@ -31,18 +31,18 @@ export const RootNavigation = () => {
         options={{gestureEnabled: false, headerShown: false}}
       />
       <RootStack.Screen
-        name={APP_SCREEN.VIDEO_COMPRESS_SETTING}
-        component={VideoCompressSetting}
-        options={{gestureEnabled: false, headerShown: false}}
-      />
-      <RootStack.Screen
-        name={APP_SCREEN.VIDEO_COMPRESS_PROCESS}
-        component={VideoCompressProcess}
+        name={APP_SCREEN.VIDEO_COMPRESS}
+        component={VideoCompress}
         options={{gestureEnabled: false, headerShown: false}}
       />
       <RootStack.Screen
         name={APP_SCREEN.VIDEO_PLAY}
         component={VideoPlay}
+        options={{gestureEnabled: false, headerShown: false}}
+      />
+      <RootStack.Screen
+        name={APP_SCREEN.VIDEO_DETAIL}
+        component={VideoDetail}
         options={{gestureEnabled: false, headerShown: false}}
       />
       <RootStack.Screen

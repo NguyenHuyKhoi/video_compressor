@@ -152,8 +152,8 @@ public class VideoModule extends ReactContextBaseJavaModule {
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
                     Bitmap bitmapThumb =
                             getCurrentActivity().getApplicationContext().getContentResolver().loadThumbnail(
-                                    uri, new Size(120, 120), null);
-                    video.base64Thumb = Util.bitmapToBase64(bitmapThumb);
+                                    uri, new Size(320, 180), null);
+                    video.base64Thumb = "data:image/jpeg;base64," + Util.bitmapToBase64(bitmapThumb);
                 }
                 Log.d("VIDEO:", video.title);
                 videoList.add(video);

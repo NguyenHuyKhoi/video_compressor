@@ -1,13 +1,12 @@
 export interface ConfigEntity {
-  percentage?: number;
   width: number;
   height: number;
   size?: number;
-  bitrate: number;
-  standard?: string;
+  resolution?: StandardResolution;
 }
 
 export interface StandardResolution {
   name: string;
   value: number;
+  value2: number;
 }

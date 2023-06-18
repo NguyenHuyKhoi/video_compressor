@@ -1,7 +1,6 @@
 import {VideoEntity, VideoGroupEntity} from '@model';
 
 export const groupVideo = (videos: VideoEntity[]) => {
-  console.log('VIDEOS: ', videos);
   const groups: VideoGroupEntity[] = [
     {
       name: 'Download',
