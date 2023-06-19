@@ -1,10 +1,11 @@
+import {VideoActions} from '@components';
 import {APP_SCREEN, RootStackParamList} from '@navigation';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {colors} from '@themes';
-import {sizes} from '@utils';
+import {_screen_width, sizes} from '@utils';
 import React, {FC, useEffect, useState} from 'react';
-import {StyleSheet, View} from 'react-native';
+import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import * as Progress from 'react-native-progress';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Video} from './component';
@@ -25,7 +26,7 @@ export const VideoCompress: FC<Props> = ({}) => {
   useEffect(() => {}, [navigation]);
 
   const [progressSize, setProgressSize] = useState<number>(0);
-  const [status, setStatus] = useState<STATUS>(STATUS.PROCESSING);
+  const [status, setStatus] = useState<STATUS>(STATUS.SUCCESS);
   const [outputUri, setOutputUri] = useState<string>();
 
   // const compressVideo = useCallback(async () => {
@@ -100,17 +101,49 @@ export const VideoCompress: FC<Props> = ({}) => {
     }
   }, [navigation, outputUri, status]);
 
+  const goHome = () => {
+    navigation.navigate(APP_SCREEN.HOME);
+  };
   return (
     <View style={styles.container}>
-      <Icon name="arrow-back" size={sizes._25sdp} color={colors.white} />
+      <Icon
+        name="arrow-back"
+        size={sizes._35sdp}
+        color={colors.white}
+        style={{marginVertical: sizes._10sdp}}
+      />
       <View style={styles.row}>
         <Video data={data} original />
         <View style={styles.loadingView}>
-          <Icon name="close" size={sizes._50sdp} color={colors.white} />
+          <Icon name="arrow-forward" size={sizes._50sdp} color={'#4a9ae4'} />
         </View>
         <Video data={data} />
       </View>
-      <Progress.Bar progress={0.3} width={200} />
+      {status === STATUS.PROCESSING ? (
+        <Progress.Bar
+          progress={0.3}
+          width={_screen_width - sizes._90sdp}
+          style={styles.progress}
+          color="#4a9ae4"
+        />
+      ) : status === STATUS.SUCCESS ? (
+        <View style={styles.body}>
+          <View style={styles.completeView}>
+            <Icon
+              name="check-circle"
+              size={sizes._25sdp}
+              color={colors.white}
+            />
+            <Text style={styles.completeText}>Completed</Text>
+          </View>
+          <Text style={styles.compressUri}>{data.uri}</Text>
+          <VideoActions data={data} />
+          <View style={{flex: 1}} />
+          <TouchableOpacity style={styles.btnView} onPress={goHome}>
+            <Text style={styles.btnLabel}>Compress more</Text>
+          </TouchableOpacity>
+        </View>
+      ) : undefined}
     </View>
   );
 };
@@ -120,15 +153,52 @@ const styles = StyleSheet.create({
     backgroundColor: '#191a1e',
     padding: sizes._15sdp,
   },
-  body: {
-    margin: sizes._12sdp,
-  },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    marginHorizontal: sizes._30sdp,
   },
   loadingView: {
     flexDirection: 'column',
     alignItems: 'center',
+  },
+  progress: {
+    marginVertical: sizes._30sdp,
+    alignSelf: 'center',
+  },
+  body: {
+    flex: 1,
+    flexDirection: 'column',
+  },
+  completeView: {
+    flexDirection: 'row',
+    alignSelf: 'center',
+    marginTop: sizes._30sdp,
+    alignItems: 'center',
+  },
+  completeText: {
+    color: colors.white,
+    marginLeft: sizes._8sdp,
+    fontWeight: '600',
+    fontSize: sizes._20sdp,
+  },
+  compressUri: {
+    color: colors.caption,
+    marginTop: sizes._8sdp,
+    fontWeight: '500',
+    fontSize: sizes._16sdp,
+    alignSelf: 'center',
+  },
+  btnView: {
+    paddingVertical: sizes._15sdp,
+    backgroundColor: '#4a9ae4',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  btnLabel: {
+    fontSize: sizes._20sdp,
+    fontWeight: '500',
+    color: colors.white,
   },
 });

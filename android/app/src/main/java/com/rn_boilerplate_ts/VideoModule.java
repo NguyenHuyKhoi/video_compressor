@@ -101,7 +101,6 @@ public class VideoModule extends ReactContextBaseJavaModule {
                     }
                 }
         );
-
     }
 
     public void queryVideos(@Nullable  String path, Callback callback) {

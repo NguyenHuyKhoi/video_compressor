@@ -1,7 +1,10 @@
 import {VideoEntity} from '@model';
+import {APP_SCREEN, RootStackParamList} from '@navigation';
+import {useNavigation} from '@react-navigation/native';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {colors} from '@themes';
 import {formatBytes, formatDuration, sizes} from '@utils';
-import React, {FC} from 'react';
+import React, {FC, useCallback} from 'react';
 import {
   ImageBackground,
   StyleSheet,
@@ -12,12 +15,25 @@ import {
 
 interface Props {
   data: VideoEntity;
-  onPress: () => void;
 }
-export const Video: FC<Props> = ({data, onPress}) => {
+export const Video: FC<Props> = ({data}) => {
+  const navigation =
+    useNavigation<
+      NativeStackNavigationProp<RootStackParamList, APP_SCREEN.VIDEO_DETAIL>
+    >();
   const {base64Thumb, resolution, size, duration} = data;
+  const selectVideo = useCallback(
+    (video: VideoEntity) => {
+      navigation.navigate(APP_SCREEN.VIDEO_DETAIL, {
+        data: video,
+      });
+    },
+    [navigation],
+  );
   return (
-    <TouchableOpacity style={styles.container} onPress={onPress}>
+    <TouchableOpacity
+      style={styles.container}
+      onPress={() => selectVideo(data)}>
       <ImageBackground style={styles.image} source={{uri: base64Thumb}}>
         <View style={{flex: 1}} />
         <View style={styles.infor}>
@@ -37,14 +53,11 @@ export const Video: FC<Props> = ({data, onPress}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginBottom: sizes._10sdp,
-    marginHorizontal: sizes._5sdp,
     borderRadius: sizes._6sdp,
     overflow: 'hidden',
     elevation: 2,
   },
   image: {
-    width: '100%',
     height: undefined,
     aspectRatio: 1.5,
   },

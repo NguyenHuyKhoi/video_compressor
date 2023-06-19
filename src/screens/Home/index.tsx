@@ -1,4 +1,4 @@
-import {VideoEntity} from '@model';
+import {VideoEntity, VideoGroupEntity} from '@model';
 import {requestPermission} from '@native/permission';
 import VideoModule from '@native/video';
 import {APP_SCREEN, RootStackParamList} from '@navigation';
@@ -6,12 +6,12 @@ import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {colors} from '@themes';
 import {sizes} from '@utils';
+import _ from 'lodash';
 import React, {FC, useCallback, useEffect, useRef, useState} from 'react';
 import {
   Alert,
   AppState,
   AppStateStatus,
-  FlatList,
   Linking,
   StyleSheet,
   Text,
@@ -22,17 +22,41 @@ import DeviceInfo from 'react-native-device-info';
 import DocumentPicker, {types} from 'react-native-document-picker';
 import {PERMISSIONS} from 'react-native-permissions';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import {Video} from './components';
+import {Videos} from './components';
+import {Folders} from './components/Folders';
 interface Props {}
+
+enum VIEW_MODE {
+  VIDEO,
+  FOLDER,
+}
 export const Home: FC<Props> = ({}) => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-
+  const [readGranted, setReadGranted] = useState<boolean>(true);
+  const [videos, setVideos] = useState<VideoEntity[]>([]);
+  const [folders, setFolders] = useState<VideoGroupEntity[]>([]);
+  const [mode, setMode] = useState<VIEW_MODE>(VIEW_MODE.FOLDER);
   const appState = useRef(AppState.currentState);
 
   const retriveVideos = useCallback(() => {
     VideoModule.getVideos(null).then(videos => {
+      console.log('videos', _);
+      const groups = _(videos)
+        .groupBy('relativePath')
+        .map(function (items, path) {
+          return {
+            name: path
+              .split('/')
+              .filter(a => a !== '')
+              .pop(),
+            videos: items,
+          };
+        })
+        .value();
       setVideos(videos);
+      console.log('Groups', groups, videos);
+      setFolders(groups);
     });
   }, []);
   const handleStateChange = useCallback(
@@ -56,8 +80,6 @@ export const Home: FC<Props> = ({}) => {
       AppState.removeEventListener('change', handleStateChange);
     };
   }, [handleStateChange]);
-  const [readGranted, setReadGranted] = useState<boolean>(true);
-  const [videos, setVideos] = useState<VideoEntity[]>([]);
   const openSetting = () => {
     navigation.navigate(APP_SCREEN.SETTING);
   };
@@ -127,15 +149,6 @@ export const Home: FC<Props> = ({}) => {
     }
   };
 
-  const selectVideo = useCallback(
-    (video: VideoEntity) => {
-      navigation.navigate(APP_SCREEN.VIDEO_DETAIL, {
-        data: video,
-      });
-    },
-    [navigation],
-  );
-
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -143,21 +156,39 @@ export const Home: FC<Props> = ({}) => {
         <Text style={styles.appName}>AppName</Text>
         <Icon name="settings" size={sizes._22sdp} color={colors.white} />
       </View>
-      <TouchableOpacity style={styles.pickBtn}>
-        <Icon name="add-circle" size={sizes._40sdp} color={colors.white} />
-        <Text style={styles.pickLabel}>Select video</Text>
-      </TouchableOpacity>
-      <FlatList
-        data={videos}
-        keyExtractor={(item: VideoEntity, index: number) => index + ''}
-        style={styles.list}
-        showsVerticalScrollIndicator={false}
-        numColumns={2}
-        renderItem={({item}) => (
-          <Video data={item} onPress={() => selectVideo(item)} />
+      <View style={styles.body}>
+        <TouchableOpacity style={styles.pickBtn}>
+          <Icon name="add-circle" size={sizes._40sdp} color={colors.white} />
+          <Text style={styles.pickLabel}>Select video</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.headerList}
+          onPress={() =>
+            setMode(
+              mode === VIEW_MODE.VIDEO ? VIEW_MODE.FOLDER : VIEW_MODE.VIDEO,
+            )
+          }>
+          <Icon
+            name={mode === VIEW_MODE.FOLDER ? 'folder' : 'movie'}
+            size={sizes._25sdp}
+            color={colors.white}
+          />
+          <Text style={styles.headerListTitle}>
+            {mode === VIEW_MODE.FOLDER ? 'Folders' : 'Videos'}
+          </Text>
+          <Icon
+            name={'arrow-drop-down'}
+            size={sizes._30sdp}
+            color={colors.white}
+          />
+        </TouchableOpacity>
+        {mode === VIEW_MODE.FOLDER ? (
+          <Folders data={folders} />
+        ) : (
+          <Videos data={videos} />
         )}
-        ListFooterComponent={() => <View style={{height: sizes._20sdp}} />}
-      />
+      </View>
     </View>
   );
 };
@@ -165,6 +196,26 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#191a1e',
+  },
+  body: {
+    flex: 1,
+    padding: sizes._15sdp,
+  },
+  headerList: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: sizes._5sdp,
+    marginTop: sizes._10sdp,
+    marginBottom: sizes._20sdp,
+    borderBottomWidth: sizes._1sdp,
+    borderBottomColor: colors.gray,
+  },
+  headerListTitle: {
+    fontSize: sizes._20sdp,
+    fontWeight: '600',
+    color: colors.white,
+    flex: 1,
+    marginLeft: sizes._10sdp,
   },
   pickBtn: {
     backgroundColor: '#4a9ae4',

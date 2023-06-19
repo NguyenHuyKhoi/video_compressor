@@ -1,4 +1,6 @@
 import {VideoEntity} from '@model';
+import {colors} from '@themes';
+import {formatBytes, sizes} from '@utils';
 import React, {FC} from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 interface Props {
@@ -10,15 +12,36 @@ export const Video: FC<Props> = ({data, original}) => {
   return (
     <View style={styles.container}>
       <Text style={styles.type}>{original ? 'Original' : 'Compressed'}</Text>
-      <Text style={styles.size}>{size}</Text>
+      <Text
+        style={[
+          styles.size,
+          // eslint-disable-next-line react-native/no-inline-styles
+          {
+            color: original ? colors.white : '#4a9ae4',
+          },
+        ]}>
+        {formatBytes(size)}
+      </Text>
       <Text style={styles.resolution}>{resolution}</Text>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {},
-  type: {},
-  size: {},
-  resolution: {},
+  container: {
+    flexDirection: 'column',
+    alignItems: 'center',
+  },
+  type: {
+    fontWeight: '400',
+    fontSize: sizes._15sdp,
+    color: colors.white,
+  },
+  size: {
+    fontWeight: '700',
+    fontSize: sizes._18sdp,
+    color: colors.white,
+    marginVertical: sizes._5sdp,
+  },
+  resolution: {fontWeight: '400', fontSize: sizes._14sdp, color: colors.white},
 });

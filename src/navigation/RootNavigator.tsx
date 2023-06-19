@@ -1,13 +1,5 @@
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import {
-  Home,
-  Setting,
-  VideoCompress,
-  VideoDetail,
-  VideoList,
-  VideoPlay,
-  VideoTasks,
-} from '@screens';
+import {Home, VideoCompress, VideoDetail, VideoPlay} from '@screens';
 import React from 'react';
 import {APP_SCREEN, RootStackParamList} from './ScreenTypes';
 const RootStack = createNativeStackNavigator<RootStackParamList>();
@@ -18,16 +10,6 @@ export const RootNavigation = () => {
       <RootStack.Screen
         name={APP_SCREEN.HOME}
         component={Home}
-        options={{gestureEnabled: false, headerShown: false}}
-      />
-      <RootStack.Screen
-        name={APP_SCREEN.VIDEO_LIST}
-        component={VideoList}
-        options={{gestureEnabled: false, headerShown: false}}
-      />
-      <RootStack.Screen
-        name={APP_SCREEN.VIDEO_TASKS}
-        component={VideoTasks}
         options={{gestureEnabled: false, headerShown: false}}
       />
       <RootStack.Screen
@@ -43,11 +25,6 @@ export const RootNavigation = () => {
       <RootStack.Screen
         name={APP_SCREEN.VIDEO_DETAIL}
         component={VideoDetail}
-        options={{gestureEnabled: false, headerShown: false}}
-      />
-      <RootStack.Screen
-        name={APP_SCREEN.SETTING}
-        component={Setting}
         options={{gestureEnabled: false, headerShown: false}}
       />
     </RootStack.Navigator>

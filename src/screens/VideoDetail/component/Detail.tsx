@@ -32,13 +32,7 @@ export const Detail: FC<Props> = ({data}) => {
   }, [data, navigation]);
   return (
     <ImageBackground source={{uri: base64Thumb}} style={styles.thumbnail}>
-      <LinearGradient
-        style={styles.shadowLayer}
-        colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.8)']}
-        locations={[0, 1]}
-        start={{x: 0.5, y: 0}}
-        end={{x: 0.5, y: 1}}
-      />
+      <View style={styles.shadowLayer} />
       <View style={styles.top}>
         <View style={styles.closeView}>
           <Icon name="close" size={sizes._16sdp} color={colors.text} />
@@ -72,6 +66,8 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     padding: sizes._10sdp,
     justifyContent: 'space-between',
+    borderRadius: sizes._5sdp,
+    overflow: 'hidden',
   },
   playView: {
     width: iconSize,
@@ -129,5 +125,6 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
+    backgroundColor: 'rgba(0,0,0,0.4)',
   },
 });
