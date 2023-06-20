@@ -1,5 +1,11 @@
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import {Home, VideoCompress, VideoDetail, VideoPlay} from '@screens';
+import {
+  Home,
+  LibraryScreen,
+  VideoCompress,
+  VideoDetail,
+  VideoPlay,
+} from '@screens';
 import React from 'react';
 import {APP_SCREEN, RootStackParamList} from './ScreenTypes';
 const RootStack = createNativeStackNavigator<RootStackParamList>();
@@ -10,6 +16,11 @@ export const RootNavigation = () => {
       <RootStack.Screen
         name={APP_SCREEN.HOME}
         component={Home}
+        options={{gestureEnabled: false, headerShown: false}}
+      />
+      <RootStack.Screen
+        name={APP_SCREEN.LIBRARY}
+        component={LibraryScreen}
         options={{gestureEnabled: false, headerShown: false}}
       />
       <RootStack.Screen

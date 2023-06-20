@@ -5,14 +5,7 @@ import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {colors} from '@themes';
 import {_screen_width, formatBytes, formatDuration, sizes} from '@utils';
 import React, {FC, useCallback} from 'react';
-import {
-  ImageBackground,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
+import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 interface Props {
@@ -30,12 +23,27 @@ export const Detail: FC<Props> = ({data}) => {
       uri: data.uri,
     });
   }, [data, navigation]);
+  const goBack = useCallback(() => {
+    navigation.goBack();
+  }, [navigation]);
   return (
-    <ImageBackground source={{uri: base64Thumb}} style={styles.thumbnail}>
+    <View style={styles.container}>
+      {/* <Video
+        source={{uri: data.uri}}
+        style={styles.video}
+        resizeMode="contain"
+        paused
+      /> */}
+      <Image source={{uri: data.uri}} style={styles.video} />
       <View style={styles.shadowLayer} />
       <View style={styles.top}>
         <View style={styles.closeView}>
-          <Icon name="close" size={sizes._16sdp} color={colors.text} />
+          <Icon
+            name="close"
+            size={sizes._16sdp}
+            color={colors.text}
+            onPress={goBack}
+          />
         </View>
         <View style={styles.durationView}>
           <Text style={styles.duration}>
@@ -52,14 +60,11 @@ export const Detail: FC<Props> = ({data}) => {
           size,
         )}`}</Text>
       </View>
-    </ImageBackground>
+    </View>
   );
 };
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-  },
-  thumbnail: {
     width: _screen_width,
     height: undefined,
     aspectRatio: 1.7,
@@ -69,6 +74,14 @@ const styles = StyleSheet.create({
     borderRadius: sizes._5sdp,
     overflow: 'hidden',
   },
+  video: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+  },
+
   playView: {
     width: iconSize,
     height: iconSize,

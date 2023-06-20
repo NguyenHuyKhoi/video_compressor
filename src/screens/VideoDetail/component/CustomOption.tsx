@@ -1,4 +1,4 @@
-import {VideoEntity} from '@model';
+import {ConfigEntity, VideoEntity} from '@model';
 import Slider from '@react-native-community/slider';
 import {colors} from '@themes';
 import {sizes} from '@utils';
@@ -7,7 +7,7 @@ import {StyleSheet, Text, View} from 'react-native';
 import {commonStyle} from './style';
 interface Props {
   data: VideoEntity;
-  onSelect?: () => void;
+  onSelect: (config: ConfigEntity) => void;
 }
 export const CustomOption: FC<Props> = ({data, onSelect}) => {
   const [percent, setPercent] = useState(100);
@@ -27,6 +27,10 @@ export const CustomOption: FC<Props> = ({data, onSelect}) => {
           maximumTrackTintColor={colors.border}
           minimumTrackTintColor={'#0163de'}
           thumbTintColor={'#0163de'}
+          onValueChange={value => {
+            setPercent(value);
+            onSelect(null);
+          }}
         />
         <View style={styles.row2}>
           <Text style={styles.caption}>Estimated size </Text>

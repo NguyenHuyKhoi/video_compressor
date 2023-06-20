@@ -1,9 +1,5 @@
-import {PayloadAction, createAsyncThunk, createSlice} from '@reduxjs/toolkit';
-import {
-  FileType,
-  getPersistedUriPermissions,
-  stat,
-} from 'react-native-scoped-storage';
+import {PayloadAction, createSlice} from '@reduxjs/toolkit';
+import {FileType} from 'react-native-scoped-storage';
 export interface StorageState {
   folders: FileType[];
   selectedFolder?: FileType | null;

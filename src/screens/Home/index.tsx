@@ -32,7 +32,9 @@ enum VIEW_MODE {
 }
 export const Home: FC<Props> = ({}) => {
   const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+    useNavigation<
+      NativeStackNavigationProp<RootStackParamList, APP_SCREEN.HOME>
+    >();
   const [readGranted, setReadGranted] = useState<boolean>(true);
   const [videos, setVideos] = useState<VideoEntity[]>([]);
   const [folders, setFolders] = useState<VideoGroupEntity[]>([]);
@@ -41,7 +43,6 @@ export const Home: FC<Props> = ({}) => {
 
   const retriveVideos = useCallback(() => {
     VideoModule.getVideos(null).then(videos => {
-      console.log('videos', _);
       const groups = _(videos)
         .groupBy('relativePath')
         .map(function (items, path) {
@@ -80,9 +81,6 @@ export const Home: FC<Props> = ({}) => {
       AppState.removeEventListener('change', handleStateChange);
     };
   }, [handleStateChange]);
-  const openSetting = () => {
-    navigation.navigate(APP_SCREEN.SETTING);
-  };
 
   const requestReadStorage = async () => {
     const sdk = await DeviceInfo.getApiLevel();
@@ -141,24 +139,36 @@ export const Home: FC<Props> = ({}) => {
         base64Thumb,
       };
       console.log('Video: ', data);
-      navigation.navigate(APP_SCREEN.VIDEO_TASKS, {
-        data,
-      });
+      // navigation.navigate(APP_SCREEN.VIDEO_TASKS, {
+      //   data,
+      // });
     } catch (e) {
       console.log('ERORR:', e);
     }
   };
+
+  const goLibrary = useCallback(() => {
+    navigation.navigate(APP_SCREEN.LIBRARY);
+  }, [navigation]);
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={{width: sizes._22sdp}} />
         <Text style={styles.appName}>AppName</Text>
-        <Icon name="settings" size={sizes._22sdp} color={colors.white} />
+        <View style={styles.headerRight}>
+          {/* <Icon name="settings" size={sizes._22sdp} color={colors.white} /> */}
+          <Icon
+            name="local-library"
+            size={sizes._22sdp}
+            color={colors.white}
+            onPress={goLibrary}
+          />
+        </View>
       </View>
       <View style={styles.body}>
         <TouchableOpacity style={styles.pickBtn}>
-          <Icon name="add-circle" size={sizes._40sdp} color={colors.white} />
+          <Icon name="add-circle" size={sizes._30sdp} color={colors.white} />
           <Text style={styles.pickLabel}>Select video</Text>
         </TouchableOpacity>
 
@@ -201,6 +211,10 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: sizes._15sdp,
   },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   headerList: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -219,16 +233,16 @@ const styles = StyleSheet.create({
   },
   pickBtn: {
     backgroundColor: '#4a9ae4',
-    paddingVertical: sizes._10sdp,
+    paddingVertical: sizes._6sdp,
     borderRadius: sizes._5sdp,
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'column',
     marginHorizontal: sizes._20sdp,
-    marginVertical: sizes._12sdp,
+    marginVertical: sizes._6sdp,
   },
   pickLabel: {
-    fontWeight: '700',
+    fontWeight: '500',
     fontSize: sizes._16sdp,
     color: colors.white,
     marginTop: sizes._4sdp,

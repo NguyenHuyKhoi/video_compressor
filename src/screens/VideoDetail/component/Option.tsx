@@ -1,7 +1,13 @@
 import {StandardResolution} from '@model';
 import {sizes} from '@utils';
 import React, {FC} from 'react';
-import {StyleSheet, Text, View, ViewStyle} from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  ViewStyle,
+} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {commonStyle} from './style';
 
@@ -30,21 +36,22 @@ export const Option: FC<IOption> = ({
   return (
     <View style={[styles.container, style]}>
       <Icon
-        onPress={onSelect}
+        onPress={() => onSelect && onSelect()}
         name={selected ? 'radio-button-checked' : 'radio-button-unchecked'}
         size={sizes._25sdp}
-        color={'#787878'}
+        color={selected ? '#4a9ae4' : '#787878'}
       />
       {contentView || (
-        <View style={styles.content}>
+        <TouchableOpacity style={styles.content} onPress={onSelect}>
           <Text style={commonStyle.title}>{option?.title}</Text>
-          <Text style={styles.caption}>
+          <Text
+            style={[styles.caption, {color: selected ? '#4a9ae4' : '#787878'}]}>
             {option?.caption.replace(
               '($resolution)',
               resolution ? `(${resolution.value}x${resolution.value2})` : '',
             )}
           </Text>
-        </View>
+        </TouchableOpacity>
       )}
     </View>
   );

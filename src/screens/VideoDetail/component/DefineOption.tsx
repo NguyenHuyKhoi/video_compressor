@@ -1,23 +1,36 @@
+import {dispatch} from '@common';
 import {ConfigEntity} from '@model';
+import {setScrollEnable} from '@reducer';
 import {colors} from '@themes';
 import {sizes} from '@utils';
-import React, {FC, useState} from 'react';
+import React, {FC, useCallback, useState} from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import {commonStyle} from './style';
 interface Props {
-  onSelect?: () => void;
+  onSelect: (value: ConfigEntity) => void;
   options: ConfigEntity[];
 }
 export const DefineOption: FC<Props> = ({options, onSelect}) => {
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState(null);
-
   const items = options.map((item: ConfigEntity) => ({
     label: item.resolution?.name,
     value: item.resolution?.value,
   }));
-  console.log('Items: ', items);
+  const [value, setValue] = useState<number | undefined>(undefined);
+
+  const onSelectOption = useCallback(
+    (a: number) => {
+      setValue(a);
+      const option = options.find(item => item.resolution?.value === a);
+      if (!option) {
+        return;
+      }
+      console.log('onSelect : ', option);
+      onSelect(option);
+    },
+    [onSelect, options],
+  );
 
   return (
     <View style={styles.container}>
@@ -31,7 +44,7 @@ export const DefineOption: FC<Props> = ({options, onSelect}) => {
           backgroundColor: colors.white,
           borderColor: 'red',
         }}
-        value={value}
+        value={value || null}
         items={items}
         setOpen={setOpen}
         setValue={setValue}
@@ -47,6 +60,14 @@ export const DefineOption: FC<Props> = ({options, onSelect}) => {
         labelStyle={commonStyle.title}
         textStyle={commonStyle.title}
         listItemContainerStyle={styles.optionView}
+        dropDownContainerStyle={{maxHeight: sizes._160sdp}}
+        scrollViewProps={{nestedScrollEnabled: true}}
+        onOpen={() => dispatch(setScrollEnable(false))}
+        onClose={() => dispatch(setScrollEnable(true))}
+        onSelectItem={item => {
+          console.log('on select item', item);
+          onSelectOption(item.value || 0);
+        }}
       />
     </View>
   );

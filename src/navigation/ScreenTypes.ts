@@ -5,10 +5,12 @@ export enum APP_SCREEN {
   VIDEO_COMPRESS = 'VIDEO_COMPRESS',
   VIDEO_PLAY = 'VIDEO_PLAY',
   VIDEO_DETAIL = 'VIDEO_DETAIL',
+  LIBRARY = 'LIBRARY',
 }
 
 export type RootStackParamList = {
   [APP_SCREEN.HOME]: undefined;
+  [APP_SCREEN.LIBRARY]: undefined;
   [APP_SCREEN.VIDEO_COMPRESS]: {
     data: VideoEntity;
   };

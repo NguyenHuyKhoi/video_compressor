@@ -1,5 +1,14 @@
-import {check, Permission, request, RESULTS} from 'react-native-permissions';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import DeviceInfo from 'react-native-device-info';
+import {
+  check,
+  Permission,
+  PERMISSIONS,
+  request,
+  RESULTS,
+} from 'react-native-permissions';
+import * as ScopedStorage from 'react-native-scoped-storage';
+export const WRITE_FOLDER_KEY = 'library_fodler';
 const convertResult = (result: string) => {
   console.log('Convert permission : ', result);
   switch (result) {
@@ -24,6 +33,44 @@ export const requestPermission = async (permission: Permission) => {
       console.log('Request permission : ', permission, result);
     }
     return result;
+  } catch (error) {
+    console.log('error: ', error);
+    return false;
+  }
+};
+
+export const requestReadStorage = async () => {
+  try {
+    const sdk = await DeviceInfo.getApiLevel();
+    return await requestPermission(
+      sdk < 33
+        ? PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE
+        : PERMISSIONS.ANDROID.READ_MEDIA_VIDEO,
+    );
+  } catch (error) {
+    return false;
+  }
+};
+
+export const requestWriteStorage = async () => {
+  try {
+    const sdk = await DeviceInfo.getApiLevel();
+    console.log('sdk', sdk);
+    if (sdk < 30) {
+      return await requestPermission(
+        PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE,
+      );
+    } else {
+      const folderPath = await AsyncStorage.getItem(WRITE_FOLDER_KEY);
+      console.log('folderPath', folderPath);
+      if (folderPath) {
+        return true;
+      }
+      const requestFolder = await ScopedStorage.openDocumentTree(true);
+      console.log('folder: ', requestFolder);
+      await AsyncStorage.setItem(WRITE_FOLDER_KEY, requestFolder.uri);
+      return true;
+    }
   } catch (error) {
     console.log('error: ', error);
     return false;

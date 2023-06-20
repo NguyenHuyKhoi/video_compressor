@@ -6,6 +6,7 @@ import createSagaMiddleware from 'redux-saga';
 import appReducer from '../reducer/appReducer';
 import storageReducer from '../reducer/storageReducer';
 import languageReducer from '../reducer/languageReducer';
+import viewReducer from '../reducer/viewReducer';
 const sagaMiddleware = createSagaMiddleware();
 const middleware = [];
 middleware.push(createLogger());
@@ -19,6 +20,7 @@ const rootReducer = combineReducers({
   language: languageReducer,
   app: appReducer,
   storage: storageReducer,
+  view: viewReducer,
 });
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 const store = configureStore({
