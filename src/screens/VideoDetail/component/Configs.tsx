@@ -5,16 +5,13 @@ import {
   StandardResolution,
   VideoEntity,
 } from '@model';
-import {APP_SCREEN, RootStackParamList} from '@navigation';
-import {useNavigation} from '@react-navigation/native';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {colors} from '@themes';
+import {sizes} from '@utils';
 import React, {FC, useCallback, useEffect, useState} from 'react';
 import {StyleSheet, View} from 'react-native';
-import {IDefaultOption, Option} from './Option';
-import {DefineOption} from './DefineOption';
 import {CustomOption} from './CustomOption';
-import {sizes} from '@utils';
-import {colors} from '@themes';
+import {DefineOption} from './DefineOption';
+import {IDefaultOption, Option} from './Option';
 
 const defaultOptions: IDefaultOption[] = [
   {
@@ -50,8 +47,9 @@ const defaultOptions: IDefaultOption[] = [
 ];
 interface Props {
   data: VideoEntity;
+  onChange: (value: ConfigEntity) => void;
 }
-export const Configs: FC<Props> = ({data}) => {
+export const Configs: FC<Props> = ({data, onChange}) => {
   const {size, orientation, width, height} = data;
   const [configs, setConfigs] = useState<ConfigEntity[]>([]);
   const [idx, setIdx] = useState<number | undefined>(undefined);
@@ -88,11 +86,13 @@ export const Configs: FC<Props> = ({data}) => {
     <View style={styles.container}>
       {enableOptions.map((item: IDefaultOption, index: number) => (
         <Option
+          key={index + ''}
           option={item}
           resolution={configs[item.index].resolution}
           selected={idx === index}
           onSelect={() => {
             setIdx(index);
+            onChange(configs[item.index]);
           }}
         />
       ))}
@@ -101,8 +101,9 @@ export const Configs: FC<Props> = ({data}) => {
         contentView={
           <DefineOption
             options={configs}
-            onSelect={() => {
+            onSelect={a => {
               setIdx(enableOptions.length);
+              onChange(a);
             }}
           />
         }
@@ -111,8 +112,9 @@ export const Configs: FC<Props> = ({data}) => {
         contentView={
           <CustomOption
             data={data}
-            onSelect={() => {
+            onSelect={value => {
               setIdx(enableOptions.length + 1);
+              onChange(value);
             }}
           />
         }

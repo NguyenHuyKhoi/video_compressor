@@ -1,6 +1,6 @@
 import {VideoGroupEntity} from '@model';
 import {colors} from '@themes';
-import {sizes} from '@utils';
+import {formatBytes, sizes} from '@utils';
 import React, {FC} from 'react';
 import {
   ImageBackground,
@@ -17,6 +17,7 @@ interface Props {
 export const Folder: FC<Props> = ({data, onPress}) => {
   const {videos, name} = data;
   const thumb = videos.length > 0 ? videos[0].base64Thumb : undefined;
+  const totalSizes = videos.reduce((s, video) => (s += video.size), 0);
   return (
     <TouchableOpacity style={styles.container} onPress={onPress}>
       <ImageBackground style={styles.image} source={{uri: thumb}}>
@@ -28,6 +29,15 @@ export const Folder: FC<Props> = ({data, onPress}) => {
       </ImageBackground>
       <View style={styles.content}>
         <Text style={styles.title}>{name}</Text>
+        <Text
+          style={[
+            styles.caption,
+            {
+              marginTop: sizes._4sdp,
+            },
+          ]}>
+          {`Total: ${formatBytes(totalSizes)}`}
+        </Text>
       </View>
     </TouchableOpacity>
   );

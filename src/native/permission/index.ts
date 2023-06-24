@@ -9,6 +9,7 @@ import {
 } from 'react-native-permissions';
 import * as ScopedStorage from 'react-native-scoped-storage';
 export const WRITE_FOLDER_KEY = 'library_fodler';
+export const VIDEO_FOLDER_NAME = 'ICompressVideos';
 const convertResult = (result: string) => {
   console.log('Convert permission : ', result);
   switch (result) {
@@ -67,8 +68,14 @@ export const requestWriteStorage = async () => {
         return true;
       }
       const requestFolder = await ScopedStorage.openDocumentTree(true);
-      console.log('folder: ', requestFolder);
-      await AsyncStorage.setItem(WRITE_FOLDER_KEY, requestFolder.uri);
+
+      // Create specify folder to contain all compress videos:
+      const videoFolder = await ScopedStorage.createDirectory(
+        requestFolder.uri,
+        VIDEO_FOLDER_NAME,
+      );
+      console.log('folder: ', videoFolder);
+      await AsyncStorage.setItem(WRITE_FOLDER_KEY, videoFolder.uri);
       return true;
     }
   } catch (error) {

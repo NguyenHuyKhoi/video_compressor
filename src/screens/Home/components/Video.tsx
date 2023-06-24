@@ -6,13 +6,18 @@ import {colors} from '@themes';
 import {formatBytes, formatDuration, sizes} from '@utils';
 import React, {FC, useCallback} from 'react';
 import {
+  Alert,
   ImageBackground,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
-
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import * as ScopedStorage from 'react-native-scoped-storage';
+import {dispatch} from '@common';
+import {onDeleteVideo} from '@reducer';
+import StorageModule from '@native/storage';
 interface Props {
   data: VideoEntity;
 }
@@ -21,7 +26,12 @@ export const Video: FC<Props> = ({data}) => {
     useNavigation<
       NativeStackNavigationProp<RootStackParamList, APP_SCREEN.VIDEO_DETAIL>
     >();
-  const {base64Thumb, resolution, size, duration} = data;
+  const {base64Thumb, resolution, size, displayName, relativePath, duration} =
+    data;
+
+  const a = relativePath.split('/');
+  a.pop();
+  const folder = a.pop();
   const selectVideo = useCallback(
     (video: VideoEntity) => {
       navigation.navigate(APP_SCREEN.VIDEO_DETAIL, {
@@ -30,56 +40,96 @@ export const Video: FC<Props> = ({data}) => {
     },
     [navigation],
   );
+
+  const deleteVideo = useCallback(() => {
+    StorageModule.deleteFile(data.uri)
+      .then(() => {
+        Alert.alert('Delete successfully');
+        dispatch(onDeleteVideo(data.uri));
+      })
+      .catch(error => {
+        console.log('Delete error: ', error);
+        Alert.alert('Delete failure');
+      });
+  }, [data]);
+
   return (
     <TouchableOpacity
       style={styles.container}
       onPress={() => selectVideo(data)}>
       <ImageBackground style={styles.image} source={{uri: base64Thumb}}>
-        <View style={{flex: 1}} />
-        <View style={styles.infor}>
-          <Text style={styles.caption}>{resolution}</Text>
-          <View style={styles.row2}>
-            <Text style={styles.caption}>{formatBytes(size)}</Text>
-            <Text style={styles.caption}>
-              {formatDuration(Math.floor(duration / 1000))}
-            </Text>
-          </View>
+        <View style={styles.timeView}>
+          <Text style={styles.time}>
+            {formatDuration(Math.floor(duration / 1000))}
+          </Text>
         </View>
       </ImageBackground>
+      <View style={styles.infor}>
+        <Text numberOfLines={1} style={styles.title}>
+          {displayName + displayName}
+        </Text>
+        <Text style={styles.caption}>{folder}</Text>
+        <Text style={styles.caption}>{`${formatBytes(
+          size,
+        )} ᐧ ${resolution}`}</Text>
+      </View>
+
+      <Icon
+        name="delete"
+        size={sizes._24sdp}
+        color={colors.gray}
+        style={styles.delete}
+        onPress={deleteVideo}
+      />
     </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    borderRadius: sizes._6sdp,
-    overflow: 'hidden',
-    elevation: 2,
+    flexDirection: 'row',
   },
   image: {
-    height: undefined,
+    height: sizes._80sdp,
     aspectRatio: 1.5,
+    borderRadius: sizes._4sdp,
+    overflow: 'hidden',
   },
   infor: {
     flexDirection: 'column',
-    backgroundColor: 'rgba(0,0,0,0.2)',
-    paddingHorizontal: sizes._5sdp,
-    paddingVertical: sizes._2sdp,
-  },
-  row2: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flex: 1,
+    marginHorizontal: sizes._12sdp,
   },
   title: {
-    fontSize: sizes._13sdp,
+    fontSize: sizes._15sdp,
     fontWeight: '700',
     color: colors.white,
+    marginBottom: sizes._3sdp,
   },
   caption: {
+    fontSize: sizes._12sdp,
+    fontWeight: '500',
+    marginTop: sizes._3sdp,
+    color: '#848484',
+  },
+  timeView: {
+    position: 'absolute',
+    bottom: sizes._6sdp,
+    right: sizes._6sdp,
+    paddingVertical: sizes._2sdp,
+    paddingHorizontal: sizes._3sdp,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderRadius: sizes._2sdp,
+  },
+  time: {
     fontSize: sizes._11sdp,
     fontWeight: '600',
     color: colors.white,
+  },
+  delete: {
+    position: 'absolute',
+    bottom: sizes._6sdp,
+    right: sizes._6sdp,
+    padding: sizes._2sdp,
   },
 });

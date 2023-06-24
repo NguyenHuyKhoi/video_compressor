@@ -3,25 +3,26 @@ import {sizes} from '@utils';
 import React, {FC} from 'react';
 import {FlatList, StyleSheet, View} from 'react-native';
 import {Video} from './Video';
+import {useSelector} from '@common';
 
 interface Props {
   data: VideoEntity[];
 }
 export const Videos: FC<Props> = ({data}) => {
-  const list = data.length % 2 === 0 ? data : [...data, null];
+  const {deleted_uris} = useSelector(x => x.video);
+  const displayData = data.filter(
+    item => !deleted_uris.find(uri => item.uri === uri),
+  );
   return (
     <FlatList
-      data={list}
+      data={displayData}
       keyExtractor={(item: VideoEntity, index: number) => index + ''}
       style={styles.list}
       showsVerticalScrollIndicator={false}
-      numColumns={2}
       renderItem={({item}) => (
         <View
           // eslint-disable-next-line react-native/no-inline-styles
           style={{
-            width: '48%',
-            marginHorizontal: sizes._7sdp,
             marginBottom: sizes._15sdp,
           }}>
           {item && <Video data={item} />}

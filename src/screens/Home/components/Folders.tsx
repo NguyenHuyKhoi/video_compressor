@@ -1,17 +1,30 @@
 import {VideoGroupEntity} from '@model';
 import {colors} from '@themes';
 import {sizes} from '@utils';
-import React, {FC, useState} from 'react';
+import React, {FC, useEffect, useState} from 'react';
 import {FlatList, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Folder} from './Folder';
 import {Videos} from './Videos';
+import {useSelector} from '@common';
 
 interface Props {
   data: VideoGroupEntity[];
 }
 export const Folders: FC<Props> = ({data}) => {
   const [folder, setFolder] = useState<VideoGroupEntity | undefined>(undefined);
+  const {deleted_uris} = useSelector(x => x.video);
+  useEffect(() => {
+    if (folder) {
+      const displayVideos = folder.videos.filter(
+        item => !deleted_uris.find(uri => item.uri === uri),
+      );
+      if (displayVideos.length === 0) {
+        setFolder(undefined);
+      }
+    }
+  }, [deleted_uris, folder]);
+
   return (
     <>
       {folder ? (

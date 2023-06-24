@@ -104,7 +104,7 @@ public class VideoModule extends ReactContextBaseJavaModule {
     }
 
     public void queryVideos(@Nullable  String path, Callback callback) {
-        Log.d("VIDEOS: ", path != null ? path : "NULL");
+        Log.d("VIDEOS: PATH", path != null ? path : "NULL");
         List<Video> videoList = new ArrayList<Video>();
         try {
             Uri collection = path != null ? Uri.parse(path) : MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
@@ -132,12 +132,15 @@ public class VideoModule extends ReactContextBaseJavaModule {
             // Cache column indices.
             while (cursor.moveToNext()) {
                 Video video = new Video();
+                video.size = cursor.getInt(sizeColumn);
+                if (video.size == 0) {
+                   // continue;
+                }
                 video.id = cursor.getLong(idColumn);
                 video.title = cursor.getString(titleColumn);
                 video.displayName = cursor.getString(displayNameColumn);
                 video.data = cursor.getString(dataColumn);
                 video.duration = cursor.getInt(durationColumn);
-                video.size = cursor.getInt(sizeColumn);
                 video.relativePath = cursor.getString(relativePathColumn);
                 video.bitrate = cursor.getInt(bitrateColumn);
                 video.width = cursor.getInt(widthColumn);
@@ -148,11 +151,16 @@ public class VideoModule extends ReactContextBaseJavaModule {
                 Uri uri = ContentUris.withAppendedId(
                         MediaStore.Video.Media.EXTERNAL_CONTENT_URI, video.id);
                 video.uri = uri.toString();
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-                    Bitmap bitmapThumb =
-                            getCurrentActivity().getApplicationContext().getContentResolver().loadThumbnail(
-                                    uri, new Size(320, 180), null);
-                    video.base64Thumb = "data:image/jpeg;base64," + Util.bitmapToBase64(bitmapThumb);
+                try {
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                        Bitmap bitmapThumb =
+                                getCurrentActivity().getApplicationContext().getContentResolver().loadThumbnail(
+                                        uri, new Size(320, 180), null);
+                        video.base64Thumb = "data:image/jpeg;base64," + Util.bitmapToBase64(bitmapThumb);
+                    }
+                }
+                catch (Exception ex2) {
+
                 }
                 Log.d("VIDEO:", video.title);
                 videoList.add(video);

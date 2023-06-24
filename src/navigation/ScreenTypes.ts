@@ -1,4 +1,4 @@
-import {VideoEntity} from '@model';
+import {ConfigEntity, VideoEntity} from '@model';
 
 export enum APP_SCREEN {
   HOME = 'HOME',
@@ -13,6 +13,7 @@ export type RootStackParamList = {
   [APP_SCREEN.LIBRARY]: undefined;
   [APP_SCREEN.VIDEO_COMPRESS]: {
     data: VideoEntity;
+    config: ConfigEntity;
   };
   [APP_SCREEN.VIDEO_DETAIL]: {
     data: VideoEntity;

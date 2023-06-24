@@ -41,8 +41,9 @@ export const Home: FC<Props> = ({}) => {
   const [mode, setMode] = useState<VIEW_MODE>(VIEW_MODE.FOLDER);
   const appState = useRef(AppState.currentState);
 
-  const retriveVideos = useCallback(() => {
+  const retrieveVideos = useCallback(() => {
     VideoModule.getVideos(null).then(videos => {
+      console.log('Get videos: ', videos);
       const groups = _(videos)
         .groupBy('relativePath')
         .map(function (items, path) {
@@ -66,12 +67,12 @@ export const Home: FC<Props> = ({}) => {
         appState.current.match(/inactive|background/) &&
         nextAppState === 'active'
       ) {
-        retriveVideos();
+        retrieveVideos();
       }
 
       appState.current = nextAppState;
     },
-    [retriveVideos],
+    [retrieveVideos],
   );
 
   useEffect(() => {
@@ -99,7 +100,7 @@ export const Home: FC<Props> = ({}) => {
 
   useEffect(() => {
     if (readGranted) {
-      retriveVideos();
+      retrieveVideos();
     } else {
       Alert.alert('Request read permission', 'My Alert Msg', [
         {
@@ -110,7 +111,7 @@ export const Home: FC<Props> = ({}) => {
         {text: 'OK', onPress: () => Linking.openSettings()},
       ]);
     }
-  }, [readGranted, retriveVideos]);
+  }, [readGranted, retrieveVideos]);
 
   const onDirectPick = async () => {
     try {
@@ -151,6 +152,8 @@ export const Home: FC<Props> = ({}) => {
     navigation.navigate(APP_SCREEN.LIBRARY);
   }, [navigation]);
 
+  console.log('Videos: ', videos);
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -167,7 +170,7 @@ export const Home: FC<Props> = ({}) => {
         </View>
       </View>
       <View style={styles.body}>
-        <TouchableOpacity style={styles.pickBtn}>
+        <TouchableOpacity style={styles.pickBtn} onPress={onDirectPick}>
           <Icon name="add-circle" size={sizes._30sdp} color={colors.white} />
           <Text style={styles.pickLabel}>Select video</Text>
         </TouchableOpacity>

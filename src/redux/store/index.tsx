@@ -7,6 +7,7 @@ import appReducer from '../reducer/appReducer';
 import storageReducer from '../reducer/storageReducer';
 import languageReducer from '../reducer/languageReducer';
 import viewReducer from '../reducer/viewReducer';
+import videoReducer from '../reducer/videoReducer';
 const sagaMiddleware = createSagaMiddleware();
 const middleware = [];
 middleware.push(createLogger());
@@ -21,6 +22,7 @@ const rootReducer = combineReducers({
   app: appReducer,
   storage: storageReducer,
   view: viewReducer,
+  video: videoReducer,
 });
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 const store = configureStore({
