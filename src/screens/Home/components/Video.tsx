@@ -18,6 +18,8 @@ import * as ScopedStorage from 'react-native-scoped-storage';
 import {dispatch} from '@common';
 import {onDeleteVideo} from '@reducer';
 import StorageModule from '@native/storage';
+import Toast from 'react-native-toast-message';
+import {ToastType, globalAlert, showToast} from '@components';
 interface Props {
   data: VideoEntity;
 }
@@ -44,14 +46,22 @@ export const Video: FC<Props> = ({data}) => {
   const deleteVideo = useCallback(() => {
     StorageModule.deleteFile(data.uri)
       .then(() => {
-        Alert.alert('Delete successfully');
         dispatch(onDeleteVideo(data.uri));
+        showToast(ToastType.SUCCESS, 'Delete success');
       })
       .catch(error => {
         console.log('Delete error: ', error);
-        Alert.alert('Delete failure');
+        showToast(ToastType.ERROR, 'Delete fail');
       });
   }, [data]);
+
+  const pressDelete = useCallback(() => {
+    globalAlert.show({
+      title: 'Delete video',
+      content: 'wegwegewgwegwegweg',
+      onConfirm: deleteVideo,
+    });
+  }, [deleteVideo]);
 
   return (
     <TouchableOpacity
@@ -79,7 +89,7 @@ export const Video: FC<Props> = ({data}) => {
         size={sizes._24sdp}
         color={colors.gray}
         style={styles.delete}
-        onPress={deleteVideo}
+        onPress={pressDelete}
       />
     </TouchableOpacity>
   );

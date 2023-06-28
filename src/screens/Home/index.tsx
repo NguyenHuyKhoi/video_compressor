@@ -1,5 +1,4 @@
 import {VideoEntity, VideoGroupEntity} from '@model';
-import {requestPermission} from '@native/permission';
 import VideoModule from '@native/video';
 import {APP_SCREEN, RootStackParamList} from '@navigation';
 import {useNavigation} from '@react-navigation/native';
@@ -9,9 +8,8 @@ import {sizes} from '@utils';
 import _ from 'lodash';
 import React, {FC, useCallback, useEffect, useRef, useState} from 'react';
 import {
-  Alert,
   AppState,
-  AppStateStatus,
+  BackHandler,
   Linking,
   StyleSheet,
   Text,
@@ -20,10 +18,17 @@ import {
 } from 'react-native';
 import DeviceInfo from 'react-native-device-info';
 import DocumentPicker, {types} from 'react-native-document-picker';
-import {PERMISSIONS} from 'react-native-permissions';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Videos} from './components';
 import {Folders} from './components/Folders';
+import {
+  check,
+  Permission,
+  PERMISSIONS,
+  request,
+  RESULTS,
+} from 'react-native-permissions';
+import {PermissionRequest, globalAlert} from '@components';
 interface Props {}
 
 enum VIEW_MODE {
@@ -35,11 +40,41 @@ export const Home: FC<Props> = ({}) => {
     useNavigation<
       NativeStackNavigationProp<RootStackParamList, APP_SCREEN.HOME>
     >();
-  const [readGranted, setReadGranted] = useState<boolean>(true);
+  const [permissionResult, setPermissionResult] = useState<string | undefined>(
+    undefined,
+  );
   const [videos, setVideos] = useState<VideoEntity[]>([]);
   const [folders, setFolders] = useState<VideoGroupEntity[]>([]);
   const [mode, setMode] = useState<VIEW_MODE>(VIEW_MODE.FOLDER);
-  const appState = useRef(AppState.currentState);
+
+  const [requesting, setRequesting] = useState<boolean>(false);
+  // *************************************
+  // Handle back press
+  const backPress = useCallback(() => {
+    globalAlert.show({
+      title: 'Exit app',
+      onConfirm: () => {
+        BackHandler.exitApp();
+      },
+    });
+    console.log('Back pressed');
+  }, []);
+
+  useEffect(() => {
+    const backAction = () => {
+      backPress();
+      return true;
+    };
+
+    BackHandler.addEventListener('hardwareBackPress', backAction);
+
+    return () => {
+      BackHandler.removeEventListener('hardwareBackPress', backAction);
+    };
+  }, [backPress]);
+
+  // ******************************************
+  // Handle get data
 
   const retrieveVideos = useCallback(() => {
     VideoModule.getVideos(null).then(videos => {
@@ -61,57 +96,86 @@ export const Home: FC<Props> = ({}) => {
       setFolders(groups);
     });
   }, []);
-  const handleStateChange = useCallback(
-    (nextAppState: AppStateStatus) => {
-      if (
-        appState.current.match(/inactive|background/) &&
-        nextAppState === 'active'
-      ) {
-        retrieveVideos();
-      }
 
-      appState.current = nextAppState;
+  // ******************************************
+  // Handle read permission
+  const defineReadPermisison = useCallback(async () => {
+    const sdk = await DeviceInfo.getApiLevel();
+    const permission =
+      sdk < 33
+        ? PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE
+        : PERMISSIONS.ANDROID.READ_MEDIA_VIDEO;
+    return permission;
+  }, []);
+
+  const requestReadPermission = useCallback(
+    async (permission: Permission) => {
+      console.log('Request permission');
+      const result = await request(permission);
+      if (result === RESULTS.GRANTED || result === RESULTS.LIMITED) {
+        retrieveVideos();
+        return;
+      }
+      setPermissionResult(result);
     },
     [retrieveVideos],
   );
 
+  const checkReadPermission = useCallback(async () => {
+    const permission = await defineReadPermisison();
+    const result = await check(permission);
+    console.log('Check result ', result);
+    setPermissionResult(result);
+    if (result === RESULTS.GRANTED || result === RESULTS.LIMITED) {
+      retrieveVideos();
+      return;
+    }
+    if (result === RESULTS.DENIED) {
+      await requestReadPermission(permission);
+    }
+  }, [defineReadPermisison, requestReadPermission, retrieveVideos]);
+
   useEffect(() => {
-    AppState.addEventListener('change', handleStateChange);
+    checkReadPermission();
+  }, [checkReadPermission]);
+
+  // *************************************
+  // Handle back to app
+
+  console.log('result', permissionResult);
+  const appState = useRef(AppState.currentState);
+  React.useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      if (permissionResult === RESULTS.DENIED) {
+        return;
+      }
+      checkReadPermission();
+    });
+
+    // Return the function to unsubscribe from the event so it gets removed on unmount
+    return unsubscribe;
+  }, [checkReadPermission, navigation, permissionResult]);
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', nextAppState => {
+      if (
+        appState.current.match(/inactive|background/) &&
+        nextAppState === 'active'
+      ) {
+        console.log('Handle app state change', permissionResult);
+        if (permissionResult === RESULTS.DENIED) {
+          return;
+        }
+        checkReadPermission();
+      }
+
+      appState.current = nextAppState;
+      console.log('AppState', appState.current);
+    });
 
     return () => {
-      AppState.removeEventListener('change', handleStateChange);
+      subscription.remove();
     };
-  }, [handleStateChange]);
-
-  const requestReadStorage = async () => {
-    const sdk = await DeviceInfo.getApiLevel();
-    setReadGranted(
-      await requestPermission(
-        sdk < 33
-          ? PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE
-          : PERMISSIONS.ANDROID.READ_MEDIA_VIDEO,
-      ),
-    );
-  };
-
-  useEffect(() => {
-    requestReadStorage();
-  }, []);
-
-  useEffect(() => {
-    if (readGranted) {
-      retrieveVideos();
-    } else {
-      Alert.alert('Request read permission', 'My Alert Msg', [
-        {
-          text: 'Cancel',
-          onPress: () => console.log('Cancel Pressed'),
-          style: 'cancel',
-        },
-        {text: 'OK', onPress: () => Linking.openSettings()},
-      ]);
-    }
-  }, [readGranted, retrieveVideos]);
+  });
 
   const onDirectPick = async () => {
     try {
@@ -123,7 +187,7 @@ export const Home: FC<Props> = ({}) => {
       if (!pickedItem || !pickedItem.fileCopyUri) {
         return;
       }
-      console.log('pciekd', pickedItem);
+      console.log('pickd', pickedItem);
 
       const videoInfor = await VideoModule.getVideoInfo(pickedItem.uri);
 
@@ -152,7 +216,9 @@ export const Home: FC<Props> = ({}) => {
     navigation.navigate(APP_SCREEN.LIBRARY);
   }, [navigation]);
 
-  console.log('Videos: ', videos);
+  const openSetting = useCallback(() => {
+    Linking.openSettings();
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -174,33 +240,44 @@ export const Home: FC<Props> = ({}) => {
           <Icon name="add-circle" size={sizes._30sdp} color={colors.white} />
           <Text style={styles.pickLabel}>Select video</Text>
         </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.headerList}
-          onPress={() =>
-            setMode(
-              mode === VIEW_MODE.VIDEO ? VIEW_MODE.FOLDER : VIEW_MODE.VIDEO,
-            )
-          }>
-          <Icon
-            name={mode === VIEW_MODE.FOLDER ? 'folder' : 'movie'}
-            size={sizes._25sdp}
-            color={colors.white}
+        {permissionResult === RESULTS.GRANTED ||
+        permissionResult === RESULTS.LIMITED ? (
+          <>
+            <TouchableOpacity
+              style={styles.headerList}
+              onPress={() =>
+                setMode(
+                  mode === VIEW_MODE.VIDEO ? VIEW_MODE.FOLDER : VIEW_MODE.VIDEO,
+                )
+              }>
+              <Icon
+                name={mode === VIEW_MODE.FOLDER ? 'folder' : 'movie'}
+                size={sizes._25sdp}
+                color={colors.white}
+              />
+              <Text style={styles.headerListTitle}>
+                {mode === VIEW_MODE.FOLDER ? 'Folders' : 'Videos'}
+              </Text>
+              <Icon
+                name={'arrow-drop-down'}
+                size={sizes._30sdp}
+                color={colors.white}
+              />
+            </TouchableOpacity>
+            {mode === VIEW_MODE.FOLDER ? (
+              <Folders data={folders} />
+            ) : (
+              <Videos data={videos} />
+            )}
+          </>
+        ) : permissionResult === RESULTS.BLOCKED ||
+          permissionResult === RESULTS.UNAVAILABLE ? (
+          <PermissionRequest
+            title="Doc khi bo nho"
+            caption="fwfw 3wfweu fewfuew fue wefgf efwg ufe ewyfewg  ewfyegwe we wffwef"
+            onAllow={() => openSetting()}
           />
-          <Text style={styles.headerListTitle}>
-            {mode === VIEW_MODE.FOLDER ? 'Folders' : 'Videos'}
-          </Text>
-          <Icon
-            name={'arrow-drop-down'}
-            size={sizes._30sdp}
-            color={colors.white}
-          />
-        </TouchableOpacity>
-        {mode === VIEW_MODE.FOLDER ? (
-          <Folders data={folders} />
-        ) : (
-          <Videos data={videos} />
-        )}
+        ) : undefined}
       </View>
     </View>
   );
@@ -256,7 +333,7 @@ const styles = StyleSheet.create({
     paddingVertical: sizes._15sdp,
     paddingHorizontal: sizes._10sdp,
     justifyContent: 'space-between',
-    borderBottomColor: colors.border,
+    borderBottomColor: colors.AzureishWhite,
     borderBottomWidth: sizes._1sdp,
   },
   appName: {

@@ -1,37 +1,17 @@
-import {isIos} from '@common';
-import {GlobalMessage, globalMessageRef} from '@components';
+import Toast from 'react-native-toast-message';
 import {AppContainer} from '@navigation';
 import * as React from 'react';
 import {FC, Suspense} from 'react';
 import {I18nextProvider} from 'react-i18next';
-import KeyboardManager from 'react-native-keyboard-manager';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {Provider} from 'react-redux';
 import {PersistGate} from 'redux-persist/integration/react';
 import {persistor, store} from './src/redux/store';
 import i18next from './src/utils/i18n/i18n';
 import {MenuProvider} from 'react-native-popup-menu';
-if (isIos) {
-  KeyboardManager.setEnable(true);
-  KeyboardManager.setEnableDebugging(false);
-  KeyboardManager.setKeyboardDistanceFromTextField(10);
-  KeyboardManager.setEnableAutoToolbar(false);
-  // KeyboardManager.setToolbarDoneBarButtonItemText("Done");
-  // KeyboardManager.setToolbarManageBehaviourBy("subviews"); // "subviews" | "tag" | "position"
-  // KeyboardManager.setToolbarPreviousNextButtonEnable(false);
-  // KeyboardManager.setToolbarTintColor('#0000FF'); // Only #000000 format is supported
-  // KeyboardManager.setToolbarBarTintColor('#FFFFFF'); // Only #000000 format is supported
-  // KeyboardManager.setShouldShowToolbarPlaceholder(true);
-  KeyboardManager.setOverrideKeyboardAppearance(true);
-  KeyboardManager.setKeyboardAppearance('default'); // "default" | "light" | "dark"
-  KeyboardManager.setShouldResignOnTouchOutside(true);
-  KeyboardManager.setShouldPlayInputClicks(true);
-  KeyboardManager.resignFirstResponder();
-  // KeyboardManager.isKeyboardShowing()
-  //   .then((isShowing) => {
-  //       // ...
-  //   });
-}
+import {sizes} from '@utils';
+import {CustomMessage, GlobalAlert, globalAlertRef} from '@components';
+import FlashMessage from 'react-native-flash-message';
 interface AppProps {}
 export const App: FC<AppProps> = ({}) => {
   return (
@@ -42,7 +22,13 @@ export const App: FC<AppProps> = ({}) => {
             <Suspense fallback={null}>
               <MenuProvider>
                 <AppContainer />
-                <GlobalMessage ref={globalMessageRef} />
+                <GlobalAlert ref={globalAlertRef} />
+                <FlashMessage
+                  position="top"
+                  MessageComponent={({message}: {message: any}) => (
+                    <CustomMessage {...message} />
+                  )}
+                />
               </MenuProvider>
             </Suspense>
           </I18nextProvider>

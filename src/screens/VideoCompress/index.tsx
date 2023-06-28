@@ -1,11 +1,17 @@
-import {VideoActions} from '@components';
+import {VideoActions, globalAlert} from '@components';
 import {APP_SCREEN, RootStackParamList} from '@navigation';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {colors} from '@themes';
 import {_screen_width, formatFFmpegBytes, sizes} from '@utils';
 import React, {FC, useCallback, useEffect, useState} from 'react';
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {
+  BackHandler,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import * as Progress from 'react-native-progress';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Video} from './component';
@@ -35,6 +41,35 @@ export const VideoCompress: FC<Props> = ({}) => {
   const [status, setStatus] = useState<STATUS>(STATUS.PROCESSING);
   const [outputUri, setOutputUri] = useState<string>();
 
+  const cancelProgress = () => {
+    FFmpegKit.cancel();
+  };
+  const confirmBack = useCallback(() => {
+    cancelProgress();
+  }, []);
+
+  const backPress = useCallback(() => {
+    globalAlert.show({
+      title: 'You want to back, cancel all progress',
+      onConfirm: () => {
+        confirmBack();
+        navigation.goBack();
+      },
+    });
+    console.log('Back pressed');
+  }, [confirmBack, navigation]);
+
+  useEffect(() => {
+    const backAction = () => {
+      return true;
+    };
+
+    BackHandler.addEventListener('hardwareBackPress', backAction);
+
+    return () => {
+      BackHandler.removeEventListener('hardwareBackPress', backAction);
+    };
+  }, [backPress]);
   const compressVideo = useCallback(async () => {
     console.log('Start compress video');
     var command;
@@ -150,6 +185,7 @@ export const VideoCompress: FC<Props> = ({}) => {
         size={sizes._35sdp}
         color={colors.white}
         style={{marginVertical: sizes._10sdp}}
+        onPress={backPress}
       />
       <View style={styles.row}>
         <Video data={data} original />

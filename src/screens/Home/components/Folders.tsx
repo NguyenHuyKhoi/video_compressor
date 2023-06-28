@@ -7,6 +7,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Folder} from './Folder';
 import {Videos} from './Videos';
 import {useSelector} from '@common';
+import {Button} from '@components';
 
 interface Props {
   data: VideoGroupEntity[];
