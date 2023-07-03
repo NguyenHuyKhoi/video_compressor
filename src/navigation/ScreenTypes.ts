@@ -14,6 +14,7 @@ export type RootStackParamList = {
   [APP_SCREEN.VIDEO_COMPRESS]: {
     data: VideoEntity;
     config: ConfigEntity;
+    folder_uri: string;
   };
   [APP_SCREEN.VIDEO_DETAIL]: {
     data: VideoEntity;

@@ -1,7 +1,8 @@
 import {sizes} from '@utils';
 import {colors} from '@themes';
 import React, {FC} from 'react';
-import {StyleSheet, Text, TouchableOpacity, ViewStyle} from 'react-native';
+import {StyleSheet, TouchableOpacity, ViewStyle} from 'react-native';
+import {Text} from '@components';
 
 interface Props {
   style?: ViewStyle;
@@ -33,7 +34,7 @@ export const Button: FC<Props> = ({
 
 const styles = StyleSheet.create({
   container: {
-    paddingVertical: sizes._15sdp,
+    paddingVertical: sizes._12sdp,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: sizes._12sdp,

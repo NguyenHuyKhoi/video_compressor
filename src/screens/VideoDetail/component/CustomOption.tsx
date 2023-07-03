@@ -3,13 +3,16 @@ import Slider from '@react-native-community/slider';
 import {colors} from '@themes';
 import {formatBytes, sizes} from '@utils';
 import React, {FC, useCallback, useState} from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import {StyleSheet, View, Text as RNText} from 'react-native';
 import {commonStyle} from './style';
+import {Text} from '@components';
+import {useTranslation} from 'react-i18next';
 interface Props {
   data: VideoEntity;
   onSelect: (config: ConfigEntity) => void;
 }
 export const CustomOption: FC<Props> = ({data, onSelect}) => {
+  const {t} = useTranslation();
   const [percent, setPercent] = useState<number>(100);
   const [config, setConfig] = useState<ConfigEntity | undefined>();
 
@@ -29,15 +32,16 @@ export const CustomOption: FC<Props> = ({data, onSelect}) => {
   );
 
   const reduceSize = data.size - (config?.size || 0);
+  const reducePercent = Math.floor((reduceSize / data.size) * 100);
+  const reduceResolution = `${config?.width}x${config?.height}`;
   return (
     <View style={styles.container}>
-      <Text style={commonStyle.title}>Custom Resolution</Text>
+      <Text style={commonStyle.title}>{'resolution_custom_title'}</Text>
       <View style={styles.body}>
         <View style={styles.row1}>
-          <Text
-            style={
-              styles.title
-            }>{`Resolution  ${config?.width}x${config?.height}`}</Text>
+          <Text params={{resolution: reduceResolution}} style={styles.title}>
+            {'compress_resolution'}
+          </Text>
           <Text style={styles.title}>{`${percent}%`}</Text>
         </View>
         <Slider
@@ -46,17 +50,27 @@ export const CustomOption: FC<Props> = ({data, onSelect}) => {
           maximumValue={100}
           step={5}
           value={percent}
-          maximumTrackTintColor={colors.border}
+          maximumTrackTintColor={colors.nickel}
           minimumTrackTintColor={'#0163de'}
           thumbTintColor={'#0163de'}
           onValueChange={onChange}
         />
         <View style={styles.row2}>
-          <Text style={styles.caption}>Estimated size </Text>
-          <Text style={[styles.title]}>{formatBytes(config?.size || 0)}</Text>
-          <Text style={styles.caption}>{` (${Math.floor(
-            (reduceSize / data.size) * 100,
-          )}% Compression)`}</Text>
+          <Text style={styles.title}>{'compress_size'}</Text>
+          <Text style={[styles.title]}>
+            {'    ' + formatBytes(config?.size || 0)}
+          </Text>
+          <Text
+            style={[
+              styles.caption,
+              {
+                color: colors.DarkSpringGreen,
+                marginLeft: sizes._5sdp,
+              },
+            ]}
+            params={{percent: reducePercent}}>
+            {'compress_percent'}
+          </Text>
         </View>
       </View>
     </View>

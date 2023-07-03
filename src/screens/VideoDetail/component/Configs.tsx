@@ -15,42 +15,42 @@ import {IDefaultOption, Option} from './Option';
 
 const defaultOptions: IDefaultOption[] = [
   {
-    title: 'Small file',
-    caption: 'Low resolution ($resolution) - Acceptable Quality',
+    title: 'small_file_title',
+    caption: 'small_file_caption',
     index: 2,
   },
   {
-    title: 'Medium file',
-    caption: 'Medium resolution ($resolution)- Good Quality',
+    title: 'medium_file_title',
+    caption: 'medium_file_caption',
     index: 1,
   },
   {
-    title: 'Large file',
-    caption: 'Best resolution ($resolution)- Good Quality',
+    title: 'large_file_title',
+    caption: 'large_file_caption',
     index: 0,
   },
-  {
-    title: 'Small file (High Quality)',
-    caption: 'Low resolution ($resolution)- High Quality',
-    index: 2,
-  },
-  {
-    title: 'Medium file (High Quality)',
-    caption: 'Medium resolution ($resolution)- High Quality',
-    index: 1,
-  },
-  {
-    title: 'Large file (High Quality)',
-    caption: 'Best resolution ($resolution)- High Quality',
-    index: 0,
-  },
+  // {
+  //   title: 'Small file (High Quality)',
+  //   caption: 'Low resolution ($resolution)- High Quality',
+  //   index: 2,
+  // },
+  // {
+  //   title: 'Medium file (High Quality)',
+  //   caption: 'Medium resolution ($resolution)- High Quality',
+  //   index: 1,
+  // },
+  // {
+  //   title: 'Large file (High Quality)',
+  //   caption: 'Best resolution ($resolution)- High Quality',
+  //   index: 0,
+  // },
 ];
 interface Props {
   data: VideoEntity;
   onChange: (value: ConfigEntity) => void;
 }
 export const Configs: FC<Props> = ({data, onChange}) => {
-  const {size, orientation, width, height} = data;
+  const {orientation, width, height} = data;
   const [configs, setConfigs] = useState<ConfigEntity[]>([]);
   const [idx, setIdx] = useState<number | undefined>(undefined);
 
@@ -62,18 +62,19 @@ export const Configs: FC<Props> = ({data, onChange}) => {
       const a2 = Math.max(width, height);
       const b1 = standard.value;
       const b2 = Math.floor((a2 / a1) * b1);
+      const bitrate =
+        (parseInt(standard.bitrate.replace('M', ''), 10) * 1000000) / 8;
       if (b1 <= a1) {
-        const p = Math.floor((b1 / a1) * 100);
         list.push({
           width: orientation === ORIENTATION.PORTRAIT ? b1 : b2,
           height: orientation === ORIENTATION.PORTRAIT ? b2 : b1,
-          size: Math.floor((size * p) / 100),
+          size: (bitrate * data.duration) / 1000,
           resolution: standard,
         });
       }
     });
     setConfigs(list);
-  }, [height, orientation, size, width]);
+  }, [data.duration, height, orientation, width]);
   useEffect(() => {
     filterResolutions();
   }, [data, filterResolutions]);
@@ -88,7 +89,7 @@ export const Configs: FC<Props> = ({data, onChange}) => {
         <Option
           key={index + ''}
           option={item}
-          resolution={configs[item.index].resolution}
+          config={configs[item.index]}
           selected={idx === index}
           onSelect={() => {
             setIdx(index);
@@ -96,7 +97,7 @@ export const Configs: FC<Props> = ({data, onChange}) => {
           }}
         />
       ))}
-      <Option
+      {/* <Option
         selected={idx === enableOptions.length}
         contentView={
           <DefineOption
@@ -107,8 +108,8 @@ export const Configs: FC<Props> = ({data, onChange}) => {
             }}
           />
         }
-      />
-      <Option
+      /> */}
+      {/* <Option
         contentView={
           <CustomOption
             data={data}
@@ -123,7 +124,7 @@ export const Configs: FC<Props> = ({data, onChange}) => {
         style={{
           alignItems: 'flex-start',
         }}
-      />
+      /> */}
     </View>
   );
 };

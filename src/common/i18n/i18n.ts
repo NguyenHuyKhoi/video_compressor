@@ -1,5 +1,5 @@
 import i18next from 'i18next';
-import {VN, EN} from '../../assets/locales';
+import {VN, EN} from './locales';
 import {initReactI18next} from 'react-i18next';
 i18next.use(initReactI18next).init({
   lng: 'vi',

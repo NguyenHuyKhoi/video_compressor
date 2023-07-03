@@ -4,14 +4,17 @@ import {setScrollEnable} from '@reducer';
 import {colors} from '@themes';
 import {sizes} from '@utils';
 import React, {FC, useCallback, useState} from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import {StyleSheet, View} from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import {commonStyle} from './style';
+import {Text} from '@components';
+import {useTranslation} from 'react-i18next';
 interface Props {
   onSelect: (value: ConfigEntity) => void;
   options: ConfigEntity[];
 }
 export const DefineOption: FC<Props> = ({options, onSelect}) => {
+  const {t} = useTranslation();
   const [open, setOpen] = useState(false);
   const items = options.map((item: ConfigEntity) => ({
     label: item.resolution?.name,
@@ -35,7 +38,7 @@ export const DefineOption: FC<Props> = ({options, onSelect}) => {
   return (
     <View style={styles.container}>
       <Text style={[commonStyle.title, {marginLeft: sizes._10sdp}]}>
-        Resolution
+        {'resolution_select_title'}
       </Text>
       <DropDownPicker
         open={open}
@@ -55,12 +58,12 @@ export const DefineOption: FC<Props> = ({options, onSelect}) => {
         containerStyle={{
           width: sizes._100sdp,
         }}
-        placeholder="Select"
+        placeholder={t('select')}
         placeholderStyle={commonStyle.title}
         labelStyle={commonStyle.title}
         textStyle={commonStyle.title}
         listItemContainerStyle={styles.optionView}
-        dropDownContainerStyle={{maxHeight: sizes._160sdp}}
+        dropDownContainerStyle={{maxHeight: sizes._260sdp}}
         scrollViewProps={{nestedScrollEnabled: true}}
         onOpen={() => dispatch(setScrollEnable(false))}
         onClose={() => dispatch(setScrollEnable(true))}

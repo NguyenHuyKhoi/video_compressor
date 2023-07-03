@@ -116,23 +116,24 @@ public class VideoModule extends ReactContextBaseJavaModule {
                     null,
                     sortOrder
             );
-            int idColumn = cursor.getColumnIndex(MediaStore.Video.Media._ID);
-            int titleColumn = cursor.getColumnIndex(MediaStore.Video.Media.TITLE);
-            int displayNameColumn = cursor.getColumnIndex(MediaStore.Video.Media.DISPLAY_NAME);
-            int dataColumn = cursor.getColumnIndex(MediaStore.Video.Media.DATA);
-            int durationColumn = cursor.getColumnIndex(MediaStore.Video.Media.DURATION);
-            int sizeColumn = cursor.getColumnIndex(MediaStore.Video.Media.SIZE);
-            int relativePathColumn = cursor.getColumnIndex(MediaStore.Video.Media.RELATIVE_PATH);
-            int bitrateColumn = cursor.getColumnIndex(MediaStore.Video.Media.BITRATE);
-            int widthColumn = cursor.getColumnIndex(MediaStore.Video.Media.WIDTH);
-            int heightColumn = cursor.getColumnIndex(MediaStore.Video.Media.HEIGHT);
-            int resolutionColumn = cursor.getColumnIndex(MediaStore.Video.Media.RESOLUTION);
-            int orientationColumn = cursor.getColumnIndex(MediaStore.Video.Media.ORIENTATION);
-            int createAtColumn = cursor.getColumnIndex(MediaStore.Video.Media.DATE_ADDED);
+            int idColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID);
+            int titleColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.TITLE);
+            int displayNameColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DISPLAY_NAME);
+            int dataColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA);
+            int durationColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION);
+            int sizeColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE);
+            int relativePathColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.RELATIVE_PATH);
+            int bitrateColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.BITRATE);
+            int widthColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.WIDTH);
+            int heightColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.HEIGHT);
+            int resolutionColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.RESOLUTION);
+            int orientationColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.ORIENTATION);
+            int createAtColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_ADDED);
             // Cache column indices.
             while (cursor.moveToNext()) {
                 Video video = new Video();
                 video.size = cursor.getInt(sizeColumn);
+                Log.d("VIDEO: Size: ", (video.size + ""));
                 if (video.size == 0) {
                    // continue;
                 }

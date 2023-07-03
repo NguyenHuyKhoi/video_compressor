@@ -7,9 +7,8 @@ import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {Provider} from 'react-redux';
 import {PersistGate} from 'redux-persist/integration/react';
 import {persistor, store} from './src/redux/store';
-import i18next from './src/utils/i18n/i18n';
+import i18next from './src/common/i18n/i18n';
 import {MenuProvider} from 'react-native-popup-menu';
-import {sizes} from '@utils';
 import {CustomMessage, GlobalAlert, globalAlertRef} from '@components';
 import FlashMessage from 'react-native-flash-message';
 interface AppProps {}

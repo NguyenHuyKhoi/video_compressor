@@ -1,3 +1,4 @@
+import {Text} from '@components';
 import {VideoGroupEntity} from '@model';
 import {colors} from '@themes';
 import {formatBytes, sizes} from '@utils';
@@ -5,7 +6,6 @@ import React, {FC} from 'react';
 import {
   ImageBackground,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -36,7 +36,7 @@ export const Folder: FC<Props> = ({data, onPress}) => {
               marginTop: sizes._4sdp,
             },
           ]}>
-          {`Total: ${formatBytes(totalSizes)}`}
+          {`${formatBytes(totalSizes)}`}
         </Text>
       </View>
     </TouchableOpacity>

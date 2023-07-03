@@ -1,15 +1,10 @@
-import {StandardResolution} from '@model';
-import {sizes} from '@utils';
+import {ConfigEntity, StandardResolution} from '@model';
+import {formatBytes, sizes} from '@utils';
 import React, {FC} from 'react';
-import {
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  ViewStyle,
-} from 'react-native';
+import {StyleSheet, TouchableOpacity, View, ViewStyle} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {commonStyle} from './style';
+import {Text} from '@components';
 
 export interface IDefaultOption {
   title: string;
@@ -18,7 +13,7 @@ export interface IDefaultOption {
 }
 interface IOption {
   option?: IDefaultOption;
-  resolution?: StandardResolution;
+  config: ConfigEntity;
   selected?: boolean;
   caption?: string;
   contentView?: JSX.Element;
@@ -29,10 +24,11 @@ export const Option: FC<IOption> = ({
   option,
   selected,
   contentView,
-  resolution,
+  config,
   onSelect,
   style,
 }) => {
+  const {resolution, size} = config;
   return (
     <View style={[styles.container, style]}>
       <Icon
@@ -41,18 +37,39 @@ export const Option: FC<IOption> = ({
         size={sizes._25sdp}
         color={selected ? '#4a9ae4' : '#787878'}
       />
-      {contentView || (
-        <TouchableOpacity style={styles.content} onPress={onSelect}>
-          <Text style={commonStyle.title}>{option?.title}</Text>
-          <Text
-            style={[styles.caption, {color: selected ? '#4a9ae4' : '#787878'}]}>
-            {option?.caption.replace(
-              '($resolution)',
-              resolution ? `(${resolution.value}x${resolution.value2})` : '',
-            )}
-          </Text>
-        </TouchableOpacity>
-      )}
+      {contentView ||
+        (option ? (
+          <TouchableOpacity style={styles.content} onPress={onSelect}>
+            <View
+              // eslint-disable-next-line react-native/no-inline-styles
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}>
+              <View style={{flexDirection: 'row'}}>
+                <Text style={commonStyle.title}>{option.title}</Text>
+                <Text style={commonStyle.title}>
+                  {resolution
+                    ? ` (${resolution.value} x ${resolution.value2}) `
+                    : ''}
+                </Text>
+              </View>
+              <Text
+                style={[
+                  styles.caption,
+                  {color: selected ? '#4a9ae4' : '#787878'},
+                ]}>{`${formatBytes(size)}`}</Text>
+            </View>
+            <Text
+              style={[
+                styles.caption,
+                {color: selected ? '#4a9ae4' : '#787878'},
+              ]}>
+              {option.caption}
+            </Text>
+          </TouchableOpacity>
+        ) : undefined)}
     </View>
   );
 };

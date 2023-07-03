@@ -1,20 +1,21 @@
-import {sizes} from '@utils';
+import {_screen_width, sizes} from '@utils';
 import React, {useImperativeHandle, useState} from 'react';
 import {
   Modal,
   StatusBar,
   StyleSheet,
-  Text,
   TouchableWithoutFeedback,
   View,
   ViewStyle,
 } from 'react-native';
 import {Button} from '../Button';
 import {colors} from '@themes';
+import {Text} from '@components';
 
 export interface AlertData {
   title: string;
   content?: string;
+  confirmLabel?: string;
   onConfirm?: () => void;
   onCancel?: () => void;
 }
@@ -49,7 +50,7 @@ export const GlobalAlert = React.forwardRef((_, ref) => {
     return;
   }
 
-  const {title, content, onCancel, onConfirm} = data;
+  const {title, content, onCancel, onConfirm, confirmLabel} = data;
   console.log('Global dataL ', title, content);
   return (
     <Modal
@@ -73,7 +74,7 @@ export const GlobalAlert = React.forwardRef((_, ref) => {
               {content && <Text style={styles.message}>{content}</Text>}
               <View style={styles.footer}>
                 <Button
-                  label="Cancel"
+                  label="cancel"
                   labelStyle={styles.cancelLabel as ViewStyle}
                   onPress={() => {
                     onCancel && onCancel();
@@ -82,7 +83,7 @@ export const GlobalAlert = React.forwardRef((_, ref) => {
                   style={styles.cancelBtn as ViewStyle}
                 />
                 <Button
-                  label="Confirm"
+                  label={confirmLabel || 'confirm'}
                   onPress={() => {
                     onConfirm && onConfirm();
                     hide();
@@ -109,6 +110,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   boxContent: {
+    width: _screen_width * 0.85,
     marginHorizontal: sizes._32sdp,
     backgroundColor: colors.raisinBlack,
     borderRadius: sizes._15sdp,
@@ -126,13 +128,16 @@ const styles = StyleSheet.create({
     color: colors.white,
   },
   cancelBtn: {
+    flex: 1,
     backgroundColor: colors.white,
     marginRight: sizes._20sdp,
   },
   cancelLabel: {
     color: colors.raisinBlack,
   },
-  button: {},
+  button: {
+    flex: 1,
+  },
   title: {
     fontSize: sizes._20sdp,
     fontWeight: '500',

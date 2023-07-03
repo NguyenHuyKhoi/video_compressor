@@ -1,7 +1,7 @@
 import {VideoEntity, VideoGroupEntity} from '@model';
 import VideoModule from '@native/video';
 import {APP_SCREEN, RootStackParamList} from '@navigation';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {colors} from '@themes';
 import {sizes} from '@utils';
@@ -12,7 +12,6 @@ import {
   BackHandler,
   Linking,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -28,7 +27,7 @@ import {
   request,
   RESULTS,
 } from 'react-native-permissions';
-import {PermissionRequest, globalAlert} from '@components';
+import {EmptyView, PermissionRequest, Text, globalAlert} from '@components';
 interface Props {}
 
 enum VIEW_MODE {
@@ -47,12 +46,11 @@ export const Home: FC<Props> = ({}) => {
   const [folders, setFolders] = useState<VideoGroupEntity[]>([]);
   const [mode, setMode] = useState<VIEW_MODE>(VIEW_MODE.FOLDER);
 
-  const [requesting, setRequesting] = useState<boolean>(false);
   // *************************************
   // Handle back press
   const backPress = useCallback(() => {
     globalAlert.show({
-      title: 'Exit app',
+      title: 'exit_app_title',
       onConfirm: () => {
         BackHandler.exitApp();
       },
@@ -61,20 +59,21 @@ export const Home: FC<Props> = ({}) => {
   }, []);
 
   useEffect(() => {
-    const backAction = () => {
+    const onBackPress = () => {
+      if (!navigation.isFocused()) {
+        return false;
+      }
       backPress();
       return true;
     };
 
-    BackHandler.addEventListener('hardwareBackPress', backAction);
+    const subscription = BackHandler.addEventListener(
+      'hardwareBackPress',
+      onBackPress,
+    );
 
-    return () => {
-      BackHandler.removeEventListener('hardwareBackPress', backAction);
-    };
-  }, [backPress]);
-
-  // ******************************************
-  // Handle get data
+    return () => subscription.remove();
+  }, [backPress, navigation]);
 
   const retrieveVideos = useCallback(() => {
     VideoModule.getVideos(null).then(videos => {
@@ -224,7 +223,7 @@ export const Home: FC<Props> = ({}) => {
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={{width: sizes._22sdp}} />
-        <Text style={styles.appName}>AppName</Text>
+        <Text style={styles.appName}>{'app_name'}</Text>
         <View style={styles.headerRight}>
           {/* <Icon name="settings" size={sizes._22sdp} color={colors.white} /> */}
           <Icon
@@ -238,7 +237,7 @@ export const Home: FC<Props> = ({}) => {
       <View style={styles.body}>
         <TouchableOpacity style={styles.pickBtn} onPress={onDirectPick}>
           <Icon name="add-circle" size={sizes._30sdp} color={colors.white} />
-          <Text style={styles.pickLabel}>Select video</Text>
+          <Text style={styles.pickLabel}>{'select_video'}</Text>
         </TouchableOpacity>
         {permissionResult === RESULTS.GRANTED ||
         permissionResult === RESULTS.LIMITED ? (
@@ -256,15 +255,18 @@ export const Home: FC<Props> = ({}) => {
                 color={colors.white}
               />
               <Text style={styles.headerListTitle}>
-                {mode === VIEW_MODE.FOLDER ? 'Folders' : 'Videos'}
+                {mode === VIEW_MODE.FOLDER ? 'folders' : 'videos'}
               </Text>
+
               <Icon
                 name={'arrow-drop-down'}
                 size={sizes._30sdp}
                 color={colors.white}
               />
             </TouchableOpacity>
-            {mode === VIEW_MODE.FOLDER ? (
+            {videos.length === 0 ? (
+              <EmptyView title="no_video_title" caption="no_video_caption" />
+            ) : mode === VIEW_MODE.FOLDER ? (
               <Folders data={folders} />
             ) : (
               <Videos data={videos} />
@@ -273,8 +275,8 @@ export const Home: FC<Props> = ({}) => {
         ) : permissionResult === RESULTS.BLOCKED ||
           permissionResult === RESULTS.UNAVAILABLE ? (
           <PermissionRequest
-            title="Doc khi bo nho"
-            caption="fwfw 3wfweu fewfuew fue wefgf efwg ufe ewyfewg  ewfyegwe we wffwef"
+            title="video_read_permission_title"
+            caption="video_read_permission_caption"
             onAllow={() => openSetting()}
           />
         ) : undefined}

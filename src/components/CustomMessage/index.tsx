@@ -1,5 +1,5 @@
 import {ToastType} from '../GlobalMessage';
-import {sizes, _getSize, _screen_statusbar_height} from '@utils';
+import {sizes, _screen_statusbar_height} from '@utils';
 import {
   CloseIcon,
   ErrorToastIcon,
@@ -9,8 +9,9 @@ import {
 } from '@assets';
 import {colors} from '@themes';
 import React, {FC} from 'react';
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {StyleSheet, TouchableOpacity, View} from 'react-native';
 import {hideMessage} from 'react-native-flash-message';
+import {Text} from '@components';
 const THEMES = {
   [ToastType.SUCCESS]: {
     backgroundColor: colors.HoneyDrew,

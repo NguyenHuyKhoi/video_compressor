@@ -12,6 +12,7 @@ export const AppContainer = () => {
     i18n.changeLanguage(language);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [language]);
+
   return (
     <NavigationContainer ref={navigationRef}>
       <RootNavigation />

@@ -1,3 +1,4 @@
+import {Text} from '@components';
 import {VideoEntity} from '@model';
 import {APP_SCREEN, RootStackParamList} from '@navigation';
 import {useNavigation} from '@react-navigation/native';
@@ -5,7 +6,13 @@ import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {colors} from '@themes';
 import {_screen_width, formatBytes, formatDuration, sizes} from '@utils';
 import React, {FC, useCallback} from 'react';
-import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  Text as RNText,
+} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 interface Props {
@@ -13,7 +20,7 @@ interface Props {
 }
 const iconSize = sizes._50sdp;
 export const Detail: FC<Props> = ({data}) => {
-  const {base64Thumb, displayName, size, duration, resolution} = data;
+  const {displayName, size, duration, resolution} = data;
   const navigation =
     useNavigation<
       NativeStackNavigationProp<RootStackParamList, APP_SCREEN.VIDEO_PLAY>
@@ -26,6 +33,7 @@ export const Detail: FC<Props> = ({data}) => {
   const goBack = useCallback(() => {
     navigation.goBack();
   }, [navigation]);
+  console.log('Duration: ', formatDuration(Math.floor(duration / 1000)));
   return (
     <View style={styles.container}>
       {/* <Video
@@ -46,9 +54,9 @@ export const Detail: FC<Props> = ({data}) => {
           />
         </View>
         <View style={styles.durationView}>
-          <Text style={styles.duration}>
+          <RNText style={styles.duration}>
             {formatDuration(Math.floor(duration / 1000))}
-          </Text>
+          </RNText>
         </View>
       </View>
       <TouchableOpacity style={styles.playView} onPress={viewVideo}>
@@ -129,8 +137,8 @@ const styles = StyleSheet.create({
   },
   caption: {
     fontSize: sizes._14sdp,
-    fontWeight: '400',
-    color: colors.border,
+    fontWeight: '500',
+    color: colors.bright_Gray,
   },
   shadowLayer: {
     height: sizes._60sdp,

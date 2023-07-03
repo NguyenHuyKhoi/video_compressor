@@ -34,31 +34,40 @@ export const Video: FC<Props> = ({data}) => {
   const a = relativePath.split('/');
   a.pop();
   const folder = a.pop();
-  const selectVideo = useCallback(
-    (video: VideoEntity) => {
-      navigation.navigate(APP_SCREEN.VIDEO_DETAIL, {
-        data: video,
-      });
-    },
-    [navigation],
-  );
 
   const deleteVideo = useCallback(() => {
     StorageModule.deleteFile(data.uri)
       .then(() => {
         dispatch(onDeleteVideo(data.uri));
-        showToast(ToastType.SUCCESS, 'Delete success');
+        showToast(ToastType.SUCCESS, 'delete_video_success');
       })
       .catch(error => {
         console.log('Delete error: ', error);
-        showToast(ToastType.ERROR, 'Delete fail');
+        showToast(ToastType.WARNING, 'delete_video_failure');
       });
   }, [data]);
 
+  const selectVideo = useCallback(
+    (video: VideoEntity) => {
+      if (video.size === 0) {
+        globalAlert.show({
+          title: 'select_video_error_title',
+          content: 'select_video_error_content',
+          onConfirm: () => deleteVideo(),
+        });
+        return;
+      }
+      navigation.navigate(APP_SCREEN.VIDEO_DETAIL, {
+        data: video,
+      });
+    },
+    [deleteVideo, navigation],
+  );
+
   const pressDelete = useCallback(() => {
     globalAlert.show({
-      title: 'Delete video',
-      content: 'wegwegewgwegwegweg',
+      title: 'delete_video_title',
+      content: 'delete_video_caption',
       onConfirm: deleteVideo,
     });
   }, [deleteVideo]);
@@ -76,7 +85,7 @@ export const Video: FC<Props> = ({data}) => {
       </ImageBackground>
       <View style={styles.infor}>
         <Text numberOfLines={1} style={styles.title}>
-          {displayName + displayName}
+          {displayName}
         </Text>
         <Text style={styles.caption}>{folder}</Text>
         <Text style={styles.caption}>{`${formatBytes(

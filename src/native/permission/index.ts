@@ -56,7 +56,6 @@ export const requestReadStorage = async () => {
 export const requestWriteStorage = async () => {
   try {
     const sdk = await DeviceInfo.getApiLevel();
-    console.log('sdk', sdk);
     if (sdk < 30) {
       return await requestPermission(
         PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE,
@@ -68,7 +67,6 @@ export const requestWriteStorage = async () => {
         return true;
       }
       const requestFolder = await ScopedStorage.openDocumentTree(true);
-
       // Create specify folder to contain all compress videos:
       const videoFolder = await ScopedStorage.createDirectory(
         requestFolder.uri,

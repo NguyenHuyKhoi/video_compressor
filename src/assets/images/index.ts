@@ -9,6 +9,8 @@ export const images = {
   whatsapp: require('./whatsapp.png'),
   youtube: require('./youtube.png'),
   messenger: require('./messenger.png'),
+  emtpy: require('./empty.png'),
+  folder: require('./folder.png'),
 };
 
 export type ImageTypes = keyof typeof images;

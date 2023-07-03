@@ -2,18 +2,25 @@ import {VideoGroupEntity} from '@model';
 import {colors} from '@themes';
 import {sizes} from '@utils';
 import React, {FC, useEffect, useState} from 'react';
-import {FlatList, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {FlatList, StyleSheet, TouchableOpacity, View} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Folder} from './Folder';
 import {Videos} from './Videos';
 import {useSelector} from '@common';
-import {Button} from '@components';
+import {Text} from '@components';
+import {useNavigation} from '@react-navigation/native';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack/lib/typescript/src/types';
+import {APP_SCREEN, RootStackParamList} from '@navigation';
 
 interface Props {
   data: VideoGroupEntity[];
 }
 export const Folders: FC<Props> = ({data}) => {
   const [folder, setFolder] = useState<VideoGroupEntity | undefined>(undefined);
+  const navigation =
+    useNavigation<
+      NativeStackNavigationProp<RootStackParamList, APP_SCREEN.HOME>
+    >();
   const {deleted_uris} = useSelector(x => x.video);
   useEffect(() => {
     if (folder) {
@@ -25,6 +32,15 @@ export const Folders: FC<Props> = ({data}) => {
       }
     }
   }, [deleted_uris, folder]);
+
+  React.useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      setFolder(undefined);
+    });
+
+    // Return the function to unsubscribe from the event so it gets removed on unmount
+    return unsubscribe;
+  }, [navigation]);
 
   return (
     <>
