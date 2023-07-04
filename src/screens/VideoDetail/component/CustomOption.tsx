@@ -3,7 +3,7 @@ import Slider from '@react-native-community/slider';
 import {colors} from '@themes';
 import {formatBytes, sizes} from '@utils';
 import React, {FC, useCallback, useState} from 'react';
-import {StyleSheet, View, Text as RNText} from 'react-native';
+import {StyleSheet, View} from 'react-native';
 import {commonStyle} from './style';
 import {Text} from '@components';
 import {useTranslation} from 'react-i18next';

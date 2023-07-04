@@ -29,7 +29,6 @@ export const DefineOption: FC<Props> = ({options, onSelect}) => {
       if (!option) {
         return;
       }
-      console.log('onSelect : ', option);
       onSelect(option);
     },
     [onSelect, options],
@@ -68,7 +67,6 @@ export const DefineOption: FC<Props> = ({options, onSelect}) => {
         onOpen={() => dispatch(setScrollEnable(false))}
         onClose={() => dispatch(setScrollEnable(true))}
         onSelectItem={item => {
-          console.log('on select item', item);
           onSelectOption(item.value || 0);
         }}
       />

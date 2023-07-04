@@ -1,10 +1,10 @@
-import {ConfigEntity, StandardResolution} from '@model';
+import {Text} from '@components';
+import {ConfigEntity} from '@model';
 import {formatBytes, sizes} from '@utils';
 import React, {FC} from 'react';
 import {StyleSheet, TouchableOpacity, View, ViewStyle} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {commonStyle} from './style';
-import {Text} from '@components';
 
 export interface IDefaultOption {
   title: string;

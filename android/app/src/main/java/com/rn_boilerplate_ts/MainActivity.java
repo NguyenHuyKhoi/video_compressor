@@ -1,7 +1,7 @@
 package com.rn_boilerplate_ts;
 
 import com.facebook.react.ReactActivity;
-
+import android.content.Intent;
 public class MainActivity extends ReactActivity {
 
   /**
@@ -11,5 +11,10 @@ public class MainActivity extends ReactActivity {
   @Override
   protected String getMainComponentName() {
     return "RN_Boilerplate_TS";
+  }
+  @Override
+  public void onNewIntent(Intent intent) {
+    super.onNewIntent(intent);
+    setIntent(intent);
   }
 }

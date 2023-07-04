@@ -35,7 +35,7 @@ export const Folders: FC<Props> = ({data}) => {
 
   React.useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
-      setFolder(undefined);
+      //  setFolder(undefined);
     });
 
     // Return the function to unsubscribe from the event so it gets removed on unmount

@@ -1,10 +1,11 @@
+import {EmptyView, PermissionRequest, Text, globalAlert} from '@components';
 import {VideoEntity, VideoGroupEntity} from '@model';
 import VideoModule from '@native/video';
 import {APP_SCREEN, RootStackParamList} from '@navigation';
-import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {colors} from '@themes';
-import {sizes} from '@utils';
+import {VIDEO_FOLDER_NAME, sizes} from '@utils';
 import _ from 'lodash';
 import React, {FC, useCallback, useEffect, useRef, useState} from 'react';
 import {
@@ -17,17 +18,16 @@ import {
 } from 'react-native';
 import DeviceInfo from 'react-native-device-info';
 import DocumentPicker, {types} from 'react-native-document-picker';
-import Icon from 'react-native-vector-icons/MaterialIcons';
-import {Videos} from './components';
-import {Folders} from './components/Folders';
 import {
-  check,
-  Permission,
   PERMISSIONS,
-  request,
+  Permission,
   RESULTS,
+  check,
+  request,
 } from 'react-native-permissions';
-import {EmptyView, PermissionRequest, Text, globalAlert} from '@components';
+import ReceiveSharingIntent from 'react-native-receive-sharing-intent';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import {Videos, Folders} from './components';
 interface Props {}
 
 enum VIEW_MODE {
@@ -45,9 +45,6 @@ export const Home: FC<Props> = ({}) => {
   const [videos, setVideos] = useState<VideoEntity[]>([]);
   const [folders, setFolders] = useState<VideoGroupEntity[]>([]);
   const [mode, setMode] = useState<VIEW_MODE>(VIEW_MODE.FOLDER);
-
-  // *************************************
-  // Handle back press
   const backPress = useCallback(() => {
     globalAlert.show({
       title: 'exit_app_title',
@@ -55,7 +52,6 @@ export const Home: FC<Props> = ({}) => {
         BackHandler.exitApp();
       },
     });
-    console.log('Back pressed');
   }, []);
 
   useEffect(() => {
@@ -77,21 +73,25 @@ export const Home: FC<Props> = ({}) => {
 
   const retrieveVideos = useCallback(() => {
     VideoModule.getVideos(null).then(videos => {
-      console.log('Get videos: ', videos);
       const groups = _(videos)
         .groupBy('relativePath')
-        .map(function (items, path) {
-          return {
-            name: path
+        .map((items, path) => {
+          const name =
+            path
               .split('/')
               .filter(a => a !== '')
-              .pop(),
+              .pop() || '';
+          const app_folder = name === VIDEO_FOLDER_NAME;
+          return {
+            name: name,
+            app_folder,
             videos: items,
           };
         })
         .value();
       setVideos(videos);
-      console.log('Groups', groups, videos);
+
+      groups.sort((a, _) => (a.app_folder ? -1 : 1));
       setFolders(groups);
     });
   }, []);
@@ -109,7 +109,6 @@ export const Home: FC<Props> = ({}) => {
 
   const requestReadPermission = useCallback(
     async (permission: Permission) => {
-      console.log('Request permission');
       const result = await request(permission);
       if (result === RESULTS.GRANTED || result === RESULTS.LIMITED) {
         retrieveVideos();
@@ -123,7 +122,6 @@ export const Home: FC<Props> = ({}) => {
   const checkReadPermission = useCallback(async () => {
     const permission = await defineReadPermisison();
     const result = await check(permission);
-    console.log('Check result ', result);
     setPermissionResult(result);
     if (result === RESULTS.GRANTED || result === RESULTS.LIMITED) {
       retrieveVideos();
@@ -140,8 +138,6 @@ export const Home: FC<Props> = ({}) => {
 
   // *************************************
   // Handle back to app
-
-  console.log('result', permissionResult);
   const appState = useRef(AppState.currentState);
   React.useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
@@ -154,13 +150,55 @@ export const Home: FC<Props> = ({}) => {
     // Return the function to unsubscribe from the event so it gets removed on unmount
     return unsubscribe;
   }, [checkReadPermission, navigation, permissionResult]);
+
+  const onPickFromIntent = useCallback(
+    async (uri: string, name: string) => {
+      try {
+        const info = await VideoModule.getVideoInfo(uri);
+
+        const base64Thumb = await VideoModule.createThumbnail(uri);
+        const data = {
+          ...info,
+          uri,
+          data: uri,
+          title: name,
+          displayName: name,
+          resolution: `${info.width}x${info.height}`,
+          base64Thumb,
+        };
+        navigation.navigate(APP_SCREEN.VIDEO_DETAIL, {
+          data,
+        });
+      } catch (error) {}
+    },
+    [navigation],
+  );
+
+  const listenIntent = useCallback(() => {
+    ReceiveSharingIntent.getReceivedFiles(
+      (files: any) => {
+        if (!files || files.length === 0) {
+          return;
+        }
+        const {fileName, filePath} = files[0];
+        onPickFromIntent(filePath, fileName);
+        // files returns as JSON Array example
+        //[{ filePath: null, text: null, weblink: null, mimeType: null, contentUri: null, fileName: null, extension: null }]
+      },
+      () => {},
+    );
+  }, [onPickFromIntent]);
+
+  useEffect(() => {
+    listenIntent();
+  }, [listenIntent]);
+
   useEffect(() => {
     const subscription = AppState.addEventListener('change', nextAppState => {
       if (
         appState.current.match(/inactive|background/) &&
         nextAppState === 'active'
       ) {
-        console.log('Handle app state change', permissionResult);
         if (permissionResult === RESULTS.DENIED) {
           return;
         }
@@ -168,7 +206,6 @@ export const Home: FC<Props> = ({}) => {
       }
 
       appState.current = nextAppState;
-      console.log('AppState', appState.current);
     });
 
     return () => {
@@ -178,42 +215,35 @@ export const Home: FC<Props> = ({}) => {
 
   const onDirectPick = async () => {
     try {
-      const pickedItem = await DocumentPicker.pickSingle({
+      const p = await DocumentPicker.pickSingle({
         presentationStyle: 'fullScreen',
         copyTo: 'cachesDirectory',
         type: [types.video],
       });
-      if (!pickedItem || !pickedItem.fileCopyUri) {
+      if (!p || !p.fileCopyUri) {
         return;
       }
-      console.log('pickd', pickedItem);
 
-      const videoInfor = await VideoModule.getVideoInfo(pickedItem.uri);
+      const info = await VideoModule.getVideoInfo(p.uri);
 
-      console.log('Vudeo infor: ', videoInfor);
       const base64Thumb = await VideoModule.createThumbnail(
-        pickedItem.fileCopyUri.replace('file://', ''),
+        p.fileCopyUri.replace('file://', ''),
       );
-      console.log('base 64 thumb: ', base64Thumb);
       const data = {
-        ...videoInfor,
-        size: pickedItem.size,
-        uri: pickedItem.fileCopyUri,
-        data: pickedItem.fileCopyUri,
+        ...info,
+        ...p,
+        uri: p.fileCopyUri,
+        data: p.fileCopyUri,
+        title: p.name,
+        displayName: p.name,
+        resolution: `${info.width}x${info.height}`,
         base64Thumb,
       };
-      console.log('Video: ', data);
-      // navigation.navigate(APP_SCREEN.VIDEO_TASKS, {
-      //   data,
-      // });
-    } catch (e) {
-      console.log('ERORR:', e);
-    }
+      navigation.navigate(APP_SCREEN.VIDEO_DETAIL, {
+        data,
+      });
+    } catch (error) {}
   };
-
-  const goLibrary = useCallback(() => {
-    navigation.navigate(APP_SCREEN.LIBRARY);
-  }, [navigation]);
 
   const openSetting = useCallback(() => {
     Linking.openSettings();
@@ -222,17 +252,7 @@ export const Home: FC<Props> = ({}) => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <View style={{width: sizes._22sdp}} />
         <Text style={styles.appName}>{'app_name'}</Text>
-        <View style={styles.headerRight}>
-          {/* <Icon name="settings" size={sizes._22sdp} color={colors.white} /> */}
-          <Icon
-            name="local-library"
-            size={sizes._22sdp}
-            color={colors.white}
-            onPress={goLibrary}
-          />
-        </View>
       </View>
       <View style={styles.body}>
         <TouchableOpacity style={styles.pickBtn} onPress={onDirectPick}>
@@ -334,7 +354,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: sizes._15sdp,
     paddingHorizontal: sizes._10sdp,
-    justifyContent: 'space-between',
     borderBottomColor: colors.AzureishWhite,
     borderBottomWidth: sizes._1sdp,
   },

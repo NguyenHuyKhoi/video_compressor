@@ -1,8 +1,9 @@
+import {Text} from '@components';
 import {VideoEntity} from '@model';
 import {colors} from '@themes';
 import {formatBytes, sizes} from '@utils';
 import React, {FC} from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import {StyleSheet, View} from 'react-native';
 interface Props {
   data: VideoEntity;
   original?: boolean;
@@ -11,7 +12,9 @@ export const Video: FC<Props> = ({data, original}) => {
   const {size, resolution} = data;
   return (
     <View style={styles.container}>
-      <Text style={styles.type}>{original ? 'Original' : 'Compressed'}</Text>
+      <Text style={styles.type}>
+        {original ? 'original_video' : 'compress_video'}
+      </Text>
       <Text
         style={[
           styles.size,

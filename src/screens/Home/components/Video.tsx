@@ -1,28 +1,26 @@
+import {dispatch} from '@common';
+import {Text, ToastType, globalAlert, showToast} from '@components';
 import {VideoEntity} from '@model';
+import StorageModule from '@native/storage';
 import {APP_SCREEN, RootStackParamList} from '@navigation';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {onDeleteVideo} from '@reducer';
 import {colors} from '@themes';
 import {formatBytes, formatDuration, sizes} from '@utils';
 import React, {FC, useCallback} from 'react';
 import {
-  Alert,
   ImageBackground,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
+  Text as RNText,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import * as ScopedStorage from 'react-native-scoped-storage';
-import {dispatch} from '@common';
-import {onDeleteVideo} from '@reducer';
-import StorageModule from '@native/storage';
-import Toast from 'react-native-toast-message';
-import {ToastType, globalAlert, showToast} from '@components';
 interface Props {
   data: VideoEntity;
 }
+const iconSize = sizes._24sdp;
 export const Video: FC<Props> = ({data}) => {
   const navigation =
     useNavigation<
@@ -41,8 +39,7 @@ export const Video: FC<Props> = ({data}) => {
         dispatch(onDeleteVideo(data.uri));
         showToast(ToastType.SUCCESS, 'delete_video_success');
       })
-      .catch(error => {
-        console.log('Delete error: ', error);
+      .catch(() => {
         showToast(ToastType.WARNING, 'delete_video_failure');
       });
   }, [data]);
@@ -73,24 +70,31 @@ export const Video: FC<Props> = ({data}) => {
   }, [deleteVideo]);
 
   return (
-    <TouchableOpacity
-      style={styles.container}
-      onPress={() => selectVideo(data)}>
-      <ImageBackground style={styles.image} source={{uri: base64Thumb}}>
-        <View style={styles.timeView}>
-          <Text style={styles.time}>
-            {formatDuration(Math.floor(duration / 1000))}
-          </Text>
-        </View>
-      </ImageBackground>
+    <View style={styles.container}>
+      <TouchableOpacity onPress={() => selectVideo(data)}>
+        <ImageBackground style={styles.image} source={{uri: base64Thumb}}>
+          <View style={styles.timeView}>
+            <RNText style={styles.time}>
+              {formatDuration(Math.floor(duration / 1000))}
+            </RNText>
+          </View>
+          <View style={styles.playView}>
+            <Icon
+              name="play-arrow"
+              size={iconSize * 0.8}
+              color={colors.white}
+            />
+          </View>
+        </ImageBackground>
+      </TouchableOpacity>
       <View style={styles.infor}>
         <Text numberOfLines={1} style={styles.title}>
           {displayName}
         </Text>
-        <Text style={styles.caption}>{folder}</Text>
-        <Text style={styles.caption}>{`${formatBytes(
-          size,
-        )} ᐧ ${resolution}`}</Text>
+        <Text style={styles.caption}>{folder || ''}</Text>
+        <Text style={styles.caption}>{`${formatBytes(size)} ᐧ ${
+          resolution || ''
+        }`}</Text>
       </View>
 
       <Icon
@@ -100,7 +104,7 @@ export const Video: FC<Props> = ({data}) => {
         style={styles.delete}
         onPress={pressDelete}
       />
-    </TouchableOpacity>
+    </View>
   );
 };
 
@@ -113,6 +117,19 @@ const styles = StyleSheet.create({
     aspectRatio: 1.5,
     borderRadius: sizes._4sdp,
     overflow: 'hidden',
+    position: 'relative',
+  },
+  playView: {
+    width: iconSize,
+    height: iconSize,
+    borderRadius: sizes._40sdp,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colors.gray + 'AA',
+    alignSelf: 'center',
+    position: 'absolute',
+    top: sizes._25sdp,
+    left: sizes._45sdp,
   },
   infor: {
     flexDirection: 'column',
@@ -133,8 +150,8 @@ const styles = StyleSheet.create({
   },
   timeView: {
     position: 'absolute',
-    bottom: sizes._6sdp,
-    right: sizes._6sdp,
+    bottom: sizes._3sdp,
+    right: sizes._3sdp,
     paddingVertical: sizes._2sdp,
     paddingHorizontal: sizes._3sdp,
     backgroundColor: 'rgba(0,0,0,0.5)',

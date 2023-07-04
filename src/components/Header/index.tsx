@@ -1,7 +1,8 @@
+import {Text} from '@components';
 import {colors} from '@themes';
 import {sizes} from '@utils';
 import React, {FC} from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import {StyleSheet, View} from 'react-native';
 
 interface Props {
   title: string;

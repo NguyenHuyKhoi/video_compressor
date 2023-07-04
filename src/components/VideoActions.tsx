@@ -1,15 +1,18 @@
-import {colors} from '@themes';
-import {_screen_width, sizes} from '@utils';
-import React, {FC} from 'react';
-import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
 import {images} from '@assets';
+import {Text, ToastType, showToast} from '@components';
 import {VideoEntity} from '@model';
+import StorageModule from '@native/storage';
+import {colors} from '@themes';
+import {sizes} from '@utils';
+import React, {FC, useCallback} from 'react';
+import {Image, StyleSheet, TouchableOpacity, View} from 'react-native';
 import Share, {
   ShareOptions,
   ShareSingleOptions,
   Social,
 } from 'react-native-share';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import {globalAlert} from './GlobalAlert';
 const itemWidth = sizes._60sdp;
 interface IAction {
   title: string;
@@ -36,7 +39,6 @@ const Action: FC<IAction> = ({title, image, icon, warning, onPress}) => {
         )}
       </View>
       <Text
-        adjustsFontSizeToFit
         // eslint-disable-next-line react-native/no-inline-styles
         style={[styles.itemTitle, {color: warning ? '#ff9966' : colors.white}]}>
         {title}
@@ -46,8 +48,9 @@ const Action: FC<IAction> = ({title, image, icon, warning, onPress}) => {
 };
 interface Props {
   data: VideoEntity;
+  onDelete?: () => void;
 }
-export const VideoActions: FC<Props> = ({data}) => {
+export const VideoActions: FC<Props> = ({data, onDelete}) => {
   const {uri} = data;
   const shareSocial = (social: Social) => {
     const options: ShareSingleOptions = {
@@ -62,12 +65,8 @@ export const VideoActions: FC<Props> = ({data}) => {
       appId: '',
     };
     Share.shareSingle(options)
-      .then(res => {
-        console.log(res);
-      })
-      .catch(err => {
-        err && console.log(err);
-      });
+      .then(() => {})
+      .catch(() => {});
   };
   const share = () => {
     const options: ShareOptions = {
@@ -76,19 +75,32 @@ export const VideoActions: FC<Props> = ({data}) => {
       url: uri,
     };
     Share.open(options)
-      .then(res => {
-        console.log(res);
-      })
-      .catch(err => {
-        err && console.log(err);
-      });
+      .then(() => {})
+      .catch(() => {});
   };
+  const deleteVideo = useCallback(() => {
+    StorageModule.deleteFile(data.uri)
+      .then(() => {
+        onDelete && onDelete();
+        showToast(ToastType.SUCCESS, 'delete_video_success');
+      })
+      .catch(() => {
+        showToast(ToastType.WARNING, 'delete_video_failure');
+      });
+  }, [data.uri, onDelete]);
 
-  const deleteVideo = () => {};
+  const pressDelete = useCallback(() => {
+    globalAlert.show({
+      title: 'delete_video_title',
+      content: 'delete_video_caption',
+      onConfirm: deleteVideo,
+    });
+  }, [deleteVideo]);
+
   return (
     <View style={styles.container}>
       <View style={styles.row}>
-        <Action title={'Other'} icon={'share'} onPress={() => share()} />
+        <Action title={'share'} icon={'share'} onPress={() => share()} />
         <Action
           title={'Email'}
           image={images.gmail}
@@ -123,9 +135,9 @@ export const VideoActions: FC<Props> = ({data}) => {
         />
         <Action
           warning
-          title={'Delete'}
+          title={'delete'}
           icon={'delete'}
-          onPress={deleteVideo}
+          onPress={pressDelete}
         />
         <View style={{width: itemWidth}} />
         <View style={{width: itemWidth}} />

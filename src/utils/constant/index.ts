@@ -1,1 +1,1 @@
-export const WRITE_FOLDER_NAME = 'IVideoCompress';
+export const VIDEO_FOLDER_NAME = 'IVideoCompress';

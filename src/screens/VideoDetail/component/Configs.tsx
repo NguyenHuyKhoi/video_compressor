@@ -56,7 +56,7 @@ export const Configs: FC<Props> = ({data, onChange}) => {
 
   const filterResolutions = useCallback(() => {
     const list: ConfigEntity[] = [];
-    console.log('REsolutions: ', RESOLUTIONS);
+
     RESOLUTIONS.forEach((standard: StandardResolution) => {
       const a1 = Math.min(width, height);
       const a2 = Math.max(width, height);
@@ -82,7 +82,6 @@ export const Configs: FC<Props> = ({data, onChange}) => {
   const enableOptions = defaultOptions.filter(
     item => configs.length >= item.index + 1,
   );
-  console.log('idx : ', idx);
   return (
     <View style={styles.container}>
       {enableOptions.map((item: IDefaultOption, index: number) => (

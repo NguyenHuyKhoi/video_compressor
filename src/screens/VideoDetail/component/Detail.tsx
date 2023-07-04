@@ -33,7 +33,6 @@ export const Detail: FC<Props> = ({data}) => {
   const goBack = useCallback(() => {
     navigation.goBack();
   }, [navigation]);
-  console.log('Duration: ', formatDuration(Math.floor(duration / 1000)));
   return (
     <View style={styles.container}>
       {/* <Video

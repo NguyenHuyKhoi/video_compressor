@@ -1,8 +1,9 @@
 /* eslint-disable react-native/no-inline-styles */
+import {Text} from '@components';
 import {colors} from '@themes';
 import {_screen_width, sizes} from '@utils';
 import React, {FC} from 'react';
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {StyleSheet, TouchableOpacity, View} from 'react-native';
 
 interface Props {
   tabs: string[];
@@ -20,7 +21,9 @@ export const Tabs: FC<Props> = ({tabs, onSelectTab, selectedTab}) => {
             styles.itemContainer,
             {
               borderBottomColor:
-                selectedTab === index ? colors.secondary : colors.primary,
+                selectedTab === index
+                  ? colors.AliceBlue
+                  : colors.AuroMetalSaurus,
               borderBottomWidth: sizes._5sdp,
             },
           ]}>

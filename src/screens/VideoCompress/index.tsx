@@ -1,25 +1,18 @@
 import {Text, VideoActions, globalAlert} from '@components';
+import {ORIENTATION} from '@model';
 import {APP_SCREEN, RootStackParamList} from '@navigation';
-import {
-  RouteProp,
-  useFocusEffect,
-  useNavigation,
-  useRoute,
-} from '@react-navigation/native';
+import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {colors} from '@themes';
-import {_screen_width, formatFFmpegBytes, sizes} from '@utils';
+import {_screen_width, sizes} from '@utils';
+import {FFmpegKit, ReturnCode} from 'ffmpeg-kit-react-native';
 import React, {FC, useCallback, useEffect, useState} from 'react';
 import {BackHandler, StyleSheet, TouchableOpacity, View} from 'react-native';
+import * as RNFS from 'react-native-fs';
 import * as Progress from 'react-native-progress';
+import * as ScopedStorage from 'react-native-scoped-storage';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Video} from './component';
-import * as RNFS from 'react-native-fs';
-import * as ScopedStorage from 'react-native-scoped-storage';
-import {FFmpegKit, ReturnCode} from 'ffmpeg-kit-react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {WRITE_FOLDER_KEY} from '@native/permission';
-import {ORIENTATION} from '@model';
 enum STATUS {
   PROCESSING,
   FAILURE,
@@ -57,7 +50,6 @@ export const VideoCompress: FC<Props> = ({}) => {
         navigation.goBack();
       },
     });
-    console.log('Back pressed');
   }, [confirmBack, navigation]);
 
   useEffect(() => {
@@ -78,7 +70,6 @@ export const VideoCompress: FC<Props> = ({}) => {
     };
   }, [confirmBack, navigation, status]);
   const compressVideo = useCallback(async () => {
-    console.log('Start compress video');
     var command;
     var resultPath: string;
     var cachePath: string;
@@ -86,9 +77,7 @@ export const VideoCompress: FC<Props> = ({}) => {
       cachePath = `file://${
         RNFS.TemporaryDirectoryPath
       }${new Date().getTime()}.mp4`;
-      console.log('Cache file', cachePath);
       const resultFolder = folder_uri;
-      console.log('result folder', resultFolder);
       if (!resultFolder) {
         return;
       }
@@ -98,7 +87,6 @@ export const VideoCompress: FC<Props> = ({}) => {
         'video/mp4',
       );
       resultPath = resultFile.uri;
-      console.log('result path', resultFile);
 
       const w =
         data.orientation === ORIENTATION.LANDSCAPE
@@ -109,9 +97,7 @@ export const VideoCompress: FC<Props> = ({}) => {
           ? config.width
           : config.height;
       command = `-i "${data.data}" -vf scale=${w}:${h} -b:v ${config.resolution?.bitrate} -y ${cachePath}`;
-      console.log('Command: ', command);
     } catch (error) {
-      console.log('Prepare file error: ', error);
       return;
     }
 
@@ -119,52 +105,39 @@ export const VideoCompress: FC<Props> = ({}) => {
       command,
       async session => {
         const returnCode = await session.getReturnCode();
-        const duration = await session.getDuration();
         const failStackTrace = await session.getFailStackTrace();
-        // console.log('COMPRESS_VIDEO: duration : ', duration);
+
         if (failStackTrace) {
-          // console.log('COMPRESS_VIDEO: failStackTrace : ', failStackTrace);
         }
 
         if (ReturnCode.isSuccess(returnCode)) {
           // SUCCESS
           try {
-            console.log('Copy file from ', cachePath, ' to  ', resultPath);
             await ScopedStorage.copyFile(cachePath, resultPath, () => {});
-            console.log('Delete temp file', await RNFS.stat(cachePath));
-            //  await RNFS.unlink(cachePath);
+
+            await RNFS.unlink(cachePath);
             setTempUri(cachePath);
             setOutputUri(resultPath);
-          } catch (error) {
-            console.log('Error', error);
-          }
+          } catch (error) {}
           setStatus(STATUS.SUCCESS);
         } else if (ReturnCode.isCancel(returnCode)) {
-          console.log('COMPRESS_VIDEO: CANCEL');
           setStatus(STATUS.FAILURE);
           // CANCEL
         } else {
-          console.log('COMPRESS_VIDEO: ERROR');
           setStatus(STATUS.FAILURE);
           // ERROR
         }
       },
-      log => {
-        // CALLED WHEN SESSION PRINTS LOGS
-        //    console.log(log.getMessage());
-      },
+      log => {},
       statistics => {
         const size = statistics.getSize();
-        // console.log('COMPRESS_VIDEO: SIZE: ', size);
         if (size > 0) {
           setProgressSize(size);
         }
-        // CALLED WHEN SESSION GENERATES STATISTICS
       },
     );
   }, [config, data, folder_uri]);
   useEffect(() => {
-    console.log('Call use effect compress video');
     compressVideo();
   }, [compressVideo]);
 
@@ -232,19 +205,14 @@ export const VideoCompress: FC<Props> = ({}) => {
               size={sizes._25sdp}
               color={colors.white}
             />
-            <Text style={styles.completeText}>Completed</Text>
+            <Text style={styles.completeText}>completed</Text>
           </View>
           {outputUri && (
             <TouchableOpacity onPress={() => viewVideo(outputUri)}>
               <Text style={styles.compressUri}>{outputUri}</Text>
             </TouchableOpacity>
           )}
-          {tempUri && (
-            <TouchableOpacity onPress={() => viewVideo(tempUri)}>
-              <Text style={styles.compressUri}>{tempUri}</Text>
-            </TouchableOpacity>
-          )}
-          <VideoActions data={data} />
+          <VideoActions data={data} onDelete={goHome} />
           <View style={{flex: 1}} />
           <TouchableOpacity style={styles.btnView} onPress={goHome}>
             <Text style={styles.btnLabel}>compress_more</Text>
@@ -311,6 +279,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#4a9ae4',
     justifyContent: 'center',
     alignItems: 'center',
+    margin: -sizes._15sdp,
   },
   btnLabel: {
     fontSize: sizes._20sdp,

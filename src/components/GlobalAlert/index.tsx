@@ -51,7 +51,6 @@ export const GlobalAlert = React.forwardRef((_, ref) => {
   }
 
   const {title, content, onCancel, onConfirm, confirmLabel} = data;
-  console.log('Global dataL ', title, content);
   return (
     <Modal
       style={styles.main}

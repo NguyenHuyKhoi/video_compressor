@@ -1,13 +1,12 @@
 import {useSelector} from '@common';
 import {Button, globalAlert} from '@components';
 import {ConfigEntity} from '@model';
-import {VIDEO_FOLDER_NAME} from '@native/permission';
 import {APP_SCREEN, RootStackParamList} from '@navigation';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {colors} from '@themes';
-import {WRITE_FOLDER_NAME, sizes} from '@utils';
-import React, {FC, useCallback, useEffect, useState} from 'react';
+import {VIDEO_FOLDER_NAME, sizes} from '@utils';
+import React, {FC, useCallback, useState} from 'react';
 import {Linking, ScrollView, StyleSheet, View, ViewStyle} from 'react-native';
 import DeviceInfo from 'react-native-device-info';
 import RNFS from 'react-native-fs';
@@ -35,11 +34,10 @@ export const VideoDetail: FC<Props> = ({}) => {
 
   const navigateToCompress = useCallback(
     (folder_uri: string) => {
-      console.log('compress uri: ', config, data, folder_uri);
       if (!config) {
         return;
       }
-      console.log('Folder Uri: ', folder_uri);
+
       navigation.navigate(APP_SCREEN.VIDEO_COMPRESS, {
         data,
         config,
@@ -53,9 +51,8 @@ export const VideoDetail: FC<Props> = ({}) => {
     const sdk = await DeviceInfo.getApiLevel();
     if (sdk < 30) {
       const writeFolder =
-        `${RNFS.ExternalDirectoryPath}/DCIM/` + WRITE_FOLDER_NAME;
+        `${RNFS.ExternalDirectoryPath}/DCIM/` + VIDEO_FOLDER_NAME;
       const isExist = await RNFS.exists(writeFolder);
-      console.log('Write folder exist: ', isExist);
       if (isExist) {
         return writeFolder;
       }
@@ -68,8 +65,6 @@ export const VideoDetail: FC<Props> = ({}) => {
   const handleWritePermission = useCallback(
     async (from_background: boolean = false) => {
       const sdk = await DeviceInfo.getApiLevel();
-      console.log('From background:', from_background);
-      console.log('SDK: ', sdk);
       if (sdk < 30) {
         const result = await check(PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE);
         if (result === RESULTS.GRANTED || result === RESULTS.LIMITED) {
@@ -101,7 +96,6 @@ export const VideoDetail: FC<Props> = ({}) => {
           } else {
             parentUri = uris[0];
           }
-          console.log('List subfolder: ', await listFiles(parentUri));
 
           var subFolders: FileType[] = await listFiles(parentUri);
           var targetUri = subFolders.find(
@@ -111,19 +105,17 @@ export const VideoDetail: FC<Props> = ({}) => {
             targetUri = (await createDirectory(parentUri, VIDEO_FOLDER_NAME))
               .uri;
           }
-          console.log('Target uri: ', targetUri);
+
           navigateToCompress(targetUri);
           return;
-        } catch (error) {
-          console.log('Errors:', error);
-        }
+        } catch (error) {}
       }
     },
     [getWriteFolder, navigateToCompress],
   );
 
   const enableBtn = config !== undefined;
-  console.log('Config Video detail: ', data);
+
   return (
     <View style={styles.container}>
       <ScrollView
@@ -133,18 +125,6 @@ export const VideoDetail: FC<Props> = ({}) => {
         <Detail data={data} />
         <Configs data={data} onChange={setConfig} />
       </ScrollView>
-      {/* <TouchableOpacity
-        disabled={!enableBtn}
-        style={[
-          styles.btnView,
-          // eslint-disable-next-line react-native/no-inline-styles
-          {
-            backgroundColor: enableBtn ? '#4a9ae4' : colors.nickel,
-          },
-        ]}
-        onPress={compress}>
-        <Text style={styles.btnLabel}>{'compress_button_title'}</Text>
-      </TouchableOpacity> */}
       <Button
         label={enableBtn ? 'compress_button_title' : 'compress_btn_disable'}
         labelStyle={styles.btnLabel as ViewStyle}

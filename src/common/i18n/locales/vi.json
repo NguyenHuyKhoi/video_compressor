@@ -38,6 +38,12 @@
     "select_video_error_content": "Vui lòng xóa khỏi thiết bị của bạn.",
     "compress_more": "Nén nhiều hơn",
     "compress_error": "Đã có vấn đề xảy ra, vui lòng thao tác lại.",
-    "try_again": "Thử lại"
+    "try_again": "Thử lại",
+    "compress_folder": "Thư mục nén",
+    "share": "Chia sẻ",
+    "delete": "Xóa",
+    "original_video": "Video gốc",
+    "compress_video": "Video nén",
+    "completed": "Hoàn thành"
   }
 }

@@ -1,4 +1,3 @@
-import Toast from 'react-native-toast-message';
 import {AppContainer} from '@navigation';
 import * as React from 'react';
 import {FC, Suspense} from 'react';
